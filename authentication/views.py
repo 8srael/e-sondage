@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
 from django.http import HttpResponse
 from django.contrib.auth.models import User
-
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -10,20 +11,25 @@ def login_and_register(request):
     return render(request, 'login_and_register.html')
 
 # login view
-def login(request):
-    if request.method == 'POST':    
-        email = request.POST['email']
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
         password = request.POST['password']
-        print(email, password)
-        user = authenticate(email=email, password=password)
+        print(username, password, request is None)
+        user = authenticate(request, username=username, password=password)
+        print(user)
         if user:
             login(request, user)    
-            return HttpResponse('Logged in')
-        return render(request, 'login_and_register.html', {'login_error': 'Nom d\'utilisateur ou mot de passe incorrect'})
+            print('In')
+            return HttpResponse(f"Logged in User {user.username}")
+        else:
+            print('Out')
+            messages.error(request, 'Email ou mot de passe incorrect')
+            return render(request, 'login_and_register.html', {'showLogin':True})
     else: 
-        return render(request, 'login_and_register.html')
+        return redirect('login_and_register')
 
-def register(request):
+def user_register(request):
     if request.method == 'POST':
         username = request.POST['username']
         email = request.POST['email']
@@ -33,13 +39,17 @@ def register(request):
         print(username, email, password, confirm_password)
 
         if(len(password) < 8):
-            return render(request, 'login_and_register.html', {'register_error': 'Le mot de passe doit contenir au moins 8 caractères', 'stay' : True})
+            messages.error(request, 'Le mot de passe doit contenir au moins 8 caractères')
+            return  render(request, 'login_and_register.html', {'stay': True, 'showRegister':True})
         if(password != confirm_password):
-            return render(request, 'login_and_register.html', {'register_error': 'Les mots de passe ne correspondent pas', 'stay' : True})
+            messages.error(request, 'Les mots de passe ne correspondent pas')
+            return  render(request, 'login_and_register.html', {'stay': True, 'showRegister':True})
 
-        user = User.objects.create_user(username=username, email=email)
-        user.set_password(password)
+        user = User.objects.create_user(username=username, email=email, password=password)
         user.save() # save the user
         return redirect('login_and_register')
     else:
-        return render(request, 'login_and_register.html')
+        return redirect('login_and_register')
+
+def user_logout(request):
+    return HttpResponse('Logged out')

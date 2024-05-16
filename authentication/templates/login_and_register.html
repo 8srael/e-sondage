@@ -14,28 +14,32 @@
 			<div class="form-container sign-up-container">
 				<form method="POST" action="{% url 'register' %}">
 					{% csrf_token %}
-					{% if register_error %}
-						<span style="color:red">{{ register_error }}</span>
+					{% if messages and showRegister %}
+						{% for message in messages %}
+							<span style="color:red; margin-bottom: 10px">{{ message }}</span>
+						{% endfor%}
 					{% endif %}
-					<h2>Inscription</h2>
+					<h1>Inscription</h1>
 					<div class="social-container">
 						<a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
 						<a href="#" class="social"><i class="fab fa-google-plus-g"></i></a>
 						<a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
 					</div>
 					<span>or use your email for registration</span>
-					<input type="text" placeholder="Name" name="username"/>
-					<input type="email" placeholder="Email" name="email"/>
-					<input type="password" placeholder="Password" name="password" />
-					<input type="password" placeholder="Confirm Password" name = "confirm-password" />
+					<input type="text" placeholder="Name" name="username" required/>
+					<input type="email" placeholder="Email" name="email" required/>
+					<input type="password" placeholder="Password" name="password" required/>
+					<input type="password" placeholder="Confirm Password" name = "confirm-password" required/>
 					<button type="submit">Sign Up</button>
 				</form>
 			</div>
 			<div class="form-container sign-in-container">
 				<form method="POST" action="{% url 'login' %}">
 					{% csrf_token %}
-					{% if login_error %}
-						<span style="color:red">{{ login_error }}</span>
+					{% if messages and showLogin %}
+						{% for message in messages %}
+							<span style="color:red; margin-bottom: 10px">{{ message }}</span>
+						{% endfor%}
 					{% endif %}
 					<h1>Connexion</h1>
 					<div class="social-container">
@@ -44,8 +48,9 @@
 						<a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
 					</div>
 					<span>or use your account</span>
-					<input type="email" placeholder="Email" name="email" />
-					<input type="password" placeholder="Password" name="password" />
+					<input type="text" placeholder="Username" name="username" required/>
+					{% comment %} <input type="email" placeholder="Email" name="email" required/> {% endcomment %}
+					<input type="password" placeholder="Password" name="password" required/>
 					<a href="#">Forgot your password?</a>
 					<button type="submit">Sign In</button>
 				</form>
@@ -53,12 +58,12 @@
 			<div class="overlay-container">
 				<div class="overlay">
 					<div class="overlay-panel overlay-left">
-						<h1>Welcome Back!</h1>
+						<h1>Bienvenue👋🏽</h1>
 						<p>To keep connected with us please login with your personal info</p>
 						<button class="ghost" id="signIn">Sign In</button>
 					</div>
 					<div class="overlay-panel overlay-right">
-						<h1>Hello, Friend!</h1>
+						<h1>Heyyy😇</h1>
 						<p>Enter your personal details and start journey with us</p>
 						<button class="ghost" id="signUp">Sign Up</button>
 					</div>
