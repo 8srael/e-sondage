@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.http import HttpResponse
 from django.contrib.auth.models import User
@@ -52,4 +52,5 @@ def user_register(request):
         return redirect('login_and_register')
 
 def user_logout(request):
-    return HttpResponse('Logged out')
+    logout(request)
+    return redirect('login_and_register')
