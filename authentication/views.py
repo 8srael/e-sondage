@@ -13,14 +13,14 @@ def login_and_register(request):
 # login view
 def user_login(request):
     if request.method == 'POST':
-        username = request.POST['username']
+        # username = request.POST['username']
+        email = request.POST['email']
         password = request.POST['password']
-        print(username, password, request is None)
-        user = authenticate(request, username=username, password=password)
-        print(user)
+        # print(email, password, request is None)
+        # user = authenticate(request, username=username, password=password)
+        user = authenticate(request, email=email, password=password)
         if user:
-            login(request, user)    
-            print('In')
+            login(request, user)    # we can use alogin which is a asynvhrone method for login a user
             return HttpResponse(f"Logged in User {user.username}")
         else:
             print('Out')
