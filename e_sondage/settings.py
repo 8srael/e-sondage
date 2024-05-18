@@ -27,6 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Authentication configurations
+
+LOGIN_URL = 'login_and_register'
+LOGIN_REDIRECT_URL = 'home'
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -42,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'authentication',
+    'polls',
 ]
 
 MIDDLEWARE = [

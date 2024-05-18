@@ -25,7 +25,7 @@ def user_login(request):
         user = authenticate(request, email=email, password=password)
         if user:
             login(request, user)    # we can use alogin which is a asynvhrone method for login a user
-            return HttpResponse(f"Logged in User {user.username}")
+            return redirect('home')
         else:
             print('Out')
             messages.error(request, 'Email ou mot de passe incorrect')
