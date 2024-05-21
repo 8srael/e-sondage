@@ -1,0 +1,22 @@
+{% extends 'home/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container" >
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="POST" action="{% url 'polls.store' %}">
+                            {% csrf_token %}
+                            <h4 class="text-center">Créer un sondage</h1>               
+                            <input type="text" placeholder="Titre" name="title" {% if data %} value="{{ data.username }}" {% endif %} required/>
+                            <textarea name="description" placeholder="Description du sondage" id="" cols="30" rows="10" required></textarea>
+                            <button type="submit">Valider</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

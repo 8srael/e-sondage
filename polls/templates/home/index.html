@@ -3,278 +3,168 @@
 {% load static %}
 
 {% block content %}
-    <div class="card-boxes">
-      <div class="box">
-        <div class="right_side">
-          <div class="numbers">10</div>
-          <div class="box_topic"> Total Sondages</div>
+    <div class="container">
+        <div class="card-boxes row">
+          <div class="box col-md-4 my-2">
+            <div class="right_side">
+              <div class="numbers">{{ user_polls | length }}</div>
+              <div class="box_topic"> Total Sondages</div>
+            </div>
+            <i class='bx bx-cart-alt'></i>
+          </div>
+          <div class="col-md-4 my-2"></div>
+          <div class="box col-md-4">
+            <div class="right_side">
+              <div class="numbers">0</div>
+              <div class="box_topic">Sondages repondus</div>
+            </div>
+            <i class='bx bxs-cart-add'></i>
+          </div>
         </div>
-        <i class='bx bx-cart-alt'></i>
-      </div>
-      <div class="box">
-        <div class="right_side">
-          <div class="numbers">6</div>
-          <div class="box_topic">Sondages repondus</div>
-        </div>
-        <i class='bx bxs-cart-add'></i>
-      </div>
-      <!-- <div class="box">
-        <div class="right_side">
-          <div class="numbers">30.20</div>
-          <div class="box_topic">Total Projects</div>
-        </div>
-        <i class='bx bx-cart'></i>
-      </div>
-      <div class="box">
-        <div class="right_side">
-          <div class="numbers">50.9</div>
-          <div class="box_topic">Total Return</div>
-        </div>
-        <i class='bx bxs-cart-download'></i>
-      </div> -->
-    </div> 
+    </div>
+   
 
-    <div class="new-poll-btn-container">
-      <div>
-        <a class="btn-link" href="#">
-          <i class='bx bx-user'></i>
-          <span class="links_name">
+    <div class="text-center">
+      <a class="btn btn-dark btn-lg" href="{% url 'polls.create' %}">
+        <i class='bx bx-heart'></i>
+        <span class="links_name">
             Créer un nouveau sondage
-          </span>
-        </a>
+        </span>
+        <i class='bx bx-heart'></i>
+      </a>
+    </div>
+
+    <div>
+      <hr>
+    </div>
+
+    <!-- <div class="text-center">
+      <h2> Liste des sondages récents </h2>
+    </div> -->
+
+    
+    <div class="container">
+      <div class="row">
+        <div class="details">
+          <div class="recent_project">
+            <div class="card_header text-center">
+              <h3 class="fw-bold">Liste des sondages récents</h2>
+            </div>
+            <div>
+              <hr>
+            </div>
+            <table>
+              <tbody>
+                {% if user_polls|length == 0 %}
+                  <div class="alert alert-info text-center">Aucun sondage n'a été crée pour le moment </div>
+                {% else %}
+                  {% for poll in user_polls %}
+                    <tr>
+                      <td>{{ forloop.counter }} - <span>{{ poll.title | upper }}</span></td>
+                      <td>
+                        <a href="">
+                          <span class="badge bg_info">
+                            Gérer les questions
+                          </span>
+                        </a>
+                      </td>
+                      <td>
+                        <a href="">
+                          <span class="badge bg_danger">
+                            Supprimer
+                          </span>
+                        </a>
+                      </td>
+                      <td>
+                        <a href="">
+                          <span class="badge bg_seccuss">
+                            Partager
+                          </span>
+                        </a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+          <!-- <div class="recent_customers">
+            <div class="card_header">
+              <h2>New Customers</h2>
+            </div>
+            <table>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="info_img">
+                      <img src="{% static 'home/pics/avatar-2.jpg' %}" alt="">
+                    </div>
+                  </td>
+                  <td>
+                    <h4>Willams Harris</h4>
+                    <span>Willams@gmail.com</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="info_img">
+                      <img src="{% static 'home/pics/avatar-3.jpg' %}" alt="">
+                    </div>
+                  </td>
+                  <td>
+                    <h4>Vanessa Tucker</h4>
+                    <span>Vanessa@gmail.com</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="info_img">
+                      <img src="{% static 'home/pics/avatar-4.jpg' %}" alt="">
+                    </div>
+                  </td>
+                  <td>
+                    <h4>Sharon Lessma</h4>
+                    <span>Sharon@gmail.com</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="info_img">
+                      <img src="{% static 'home/pics/avatar-5.jpg' %}" alt="">
+                    </div>
+                  </td>
+                  <td>
+                    <h4>Christina Mason</h4>
+                    <span>Christina@gmail.com</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="info_img">
+                      <img src="{% static 'home/pics/avatar-2.jpg' %}" alt="">
+                    </div>
+                  </td>
+                  <td>
+                    <h4>Willams Harris</h4>
+                    <span>Willams@gmail.com</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="info_img">
+                      <img src="{% static 'home/pics/avatar-3.jpg' %}" alt="">
+                    </div>
+                  </td>
+                  <td>
+                    <h4>Sharon Lessma</h4>
+                    <span>Willams@gmail.com</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div> -->
+        </div>
       </div>
     </div>
 
-    {% comment %} <div class="details">
-      <div class="recent_project">
-        <div class="card_header">
-          <h2>Lastet Projects</h2>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <td>Project Name</td>
-              <td>Hours</td>
-              <td>Priority</td>
-              <td>Members</td>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Dropbox Design System</td>
-              <td>34</td>
-              <td>
-                <span class="badge bg_worning">
-                  Meduim
-                </span>
-              </td>
-              <td>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-1.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-2.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-3.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <span class="initial">+5</span>
-                </span>
-              </td>
-            </tr>
-            <tr>
-              <td>Slack Team UI Design</td>
-              <td>47</td>
-              <td>
-                <span class="badge bg_danger">
-                  Higt
-                </span>
-              </td>
-              <td>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-5.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-2.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-3.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <span class="initial">+5</span>
-                </span>
-              </td>
-            </tr>
-            <tr>
-              <td>Github Satellite</td>
-              <td>120</td>
-              <td>
-                <span class="badge bg_info">
-                  Low
-                </span>
-              </td>
-              <td>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-4.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-5.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-2.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <span class="initial">+1</span>
-                </span>
-              </td>
-            </tr>
-            <tr>
-              <td>3D character Moddelling</td>
-              <td>89</td>
-              <td>
-                <span class="badge bg_worning">
-                  Meduim
-                </span>
-              </td>
-              <td>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-2.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-4.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-5.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <span class="initial">+5</span>
-                </span>
-              </td>
-            </tr>
-            <tr>
-              <td>Web app Design System</td>
-              <td>108</td>
-              <td>
-                <span class="badge bg_seccuss">
-                  Track
-                </span>
-              </td>
-              <td>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-2.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-3.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-4.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <span class="initial">+5</span>
-                </span>
-              </td>
-            </tr>
-            <tr>
-              <td>Github Event Design</td>
-              <td>120</td>
-              <td>
-                <span class="badge bg_info">
-                  Low
-                </span>
-              </td>
-              <td>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-5.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-2.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <img src="{% static 'home/pics/avatar-3.jpg' %}" alt="">
-                </span>
-                <span class="img_group">
-                  <span class="initial">+1</span>
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="recent_customers">
-        <div class="card_header">
-          <h2>New Customers</h2>
-        </div>
-        <table>
-          <tbody>
-            <tr>
-              <td>
-                <div class="info_img">
-                  <img src="{% static 'home/pics/avatar-2.jpg' %}" alt="">
-                </div>
-              </td>
-              <td>
-                <h4>Willams Harris</h4>
-                <span>Willams@gmail.com</span>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div class="info_img">
-                  <img src="{% static 'home/pics/avatar-3.jpg' %}" alt="">
-                </div>
-              </td>
-              <td>
-                <h4>Vanessa Tucker</h4>
-                <span>Vanessa@gmail.com</span>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div class="info_img">
-                  <img src="{% static 'home/pics/avatar-4.jpg' %}" alt="">
-                </div>
-              </td>
-              <td>
-                <h4>Sharon Lessma</h4>
-                <span>Sharon@gmail.com</span>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div class="info_img">
-                  <img src="{% static 'home/pics/avatar-5.jpg' %}" alt="">
-                </div>
-              </td>
-              <td>
-                <h4>Christina Mason</h4>
-                <span>Christina@gmail.com</span>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div class="info_img">
-                  <img src="{% static 'home/pics/avatar-2.jpg' %}" alt="">
-                </div>
-              </td>
-              <td>
-                <h4>Willams Harris</h4>
-                <span>Willams@gmail.com</span>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div class="info_img">
-                  <img src="{% static 'home/pics/avatar-3.jpg' %}" alt="">
-                </div>
-              </td>
-              <td>
-                <h4>Sharon Lessma</h4>
-                <span>Willams@gmail.com</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div> {% endcomment %}
 {% endblock %}  

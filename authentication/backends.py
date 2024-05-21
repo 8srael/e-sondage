@@ -5,7 +5,6 @@ from django.contrib.auth.backends import BaseBackend
 class EmailAuthBackend(BaseBackend):
     def authenticate(self, request, email=None, password=None, **credentials):
         User = get_user_model()
-        print(User)
         try:
             user = User.objects.get(email=email)
             if user.check_password(password):
