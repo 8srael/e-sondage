@@ -1,0 +1,61 @@
+{% extends 'home/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="">
+                        <h3 class=""></h3>
+                    </div>
+                    <div class="">
+                        <p class="h5 text-secondary">
+                           
+                        </p>
+                    </div>
+
+                    <div class="divider divider-primary">
+                        <div class="divider-text fs-5">Questions</div>
+                    </div>
+
+                        <div id="accordionIcon" class="accordion mt-3 accordion-without-arrow">
+                            <div class="accordion-item card">
+                                <h2 class="accordion-header text-body d-flex justify-content-between" id="accordionIconOne">
+                                    <button
+                                        type="button"
+                                        class="accordion-button collapsed"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#accordion"
+                                        aria-controls="accordionIcon-1"
+                                        >
+                                        <span class="text-primary"></span> 
+                                    </button>
+
+                                    <div>
+                                        <a href=""  class="btn btn-sm btn-outline-secondary mx-2" >Update</a> 
+                                    </div>
+                                    <div>
+                                       
+                                    </div>
+                                </h2>
+        
+                                <div id="accordionQuestionId" class="accordion-collapse collapse" data-bs-parent="#accordionIcon">
+                                    <div class="accordion-body">
+                                        <ol>
+                                       
+                                            <li>for</li>
+                                        </ol>
+                                        <small class="alert alert-secondary">No Answer Options added</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-secondary">Nothing to show. Add questions below.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

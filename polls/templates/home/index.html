@@ -25,12 +25,12 @@
    
 
     <div class="text-center">
-      <a class="btn btn-dark btn-lg" href="{% url 'polls.create' %}">
+      <a class="btn btn-dark btn-lg" id="poll-btn"  href="{% url 'polls.create' %}" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
         <i class='bx bx-heart'></i>
         <span class="links_name">
             Créer un nouveau sondage
         </span>
-        <i class='bx bx-heart'></i>
+        <i class='bx bx-heart'></i> 
       </a>
     </div>
 
@@ -60,25 +60,36 @@
                 {% else %}
                   {% for poll in user_polls %}
                     <tr>
-                      <td>{{ forloop.counter }} - <span>{{ poll.title | upper }}</span></td>
-                      <td>
-                        <a href="">
+                      <td class="">{{ forloop.counter }} - <span class="fw-bold">{{ poll.title | upper }}</span></td>
+                      <td class="">
+                        <a href="{% url 'poll.questions.manage' poll.id %}">
                           <span class="badge bg_info">
-                            Gérer les questions
+                            <i class='bx bxs-heart bx-sm'></i>
+                            <!-- Questions -->
                           </span>
                         </a>
                       </td>
-                      <td>
+                      <td class="">
                         <a href="">
                           <span class="badge bg_danger">
-                            Supprimer
+                            <i class='bx bxs-trash bx-sm'></i>
+                            <!-- Supprimer -->
                           </span>
                         </a>
                       </td>
-                      <td>
+                      <td class="">
+                        <a href="">
+                          <span class="badge bg_worning">
+                            <i class='bx bxs-pencil bx-sm'></i>
+                            <!-- Modifier -->
+                          </span>
+                        </a>
+                      </td>
+                      <td class="">
                         <a href="">
                           <span class="badge bg_seccuss">
-                            Partager
+                            <i class='bx bxs-send bx-sm'></i>
+                            <!-- Partager -->
                           </span>
                         </a>
                       </td>
@@ -166,5 +177,69 @@
         </div>
       </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-dark">
+            <!-- <h1 class="modal-title fs-5" id="staticBackdropLabel">Créer un nouveau sondage</h1> -->
+            <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="container">
+              <div class="form-container">
+                  <h3 class="text-center fw-bold">Nouveau sondage</h2>
+                  <form id="poll-modal-form" method="POST">
+                      {% csrf_token %}
+                      <div class="mb-3">
+                          <label for="title" class="form-label fw-bold">Title</label>
+                          <input type="text" id="title" class="form-control" id="title" placeholder="Entrer le titre du sondage">
+                      </div>
+                      <div class="mb-3">
+                          <label for="description" class="form-label fw-bold">Description</label>
+                          <textarea id="description" class="form-control" id="description" rows="4" placeholder="Donnez l'idée générale du sondage"></textarea>
+                      </div>
+                      <button type="submit" class="btn btn-dark w-100">Submit</button>
+                  </form>
+              </div>
+          </div>
+          </div>
+          <!-- <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Understood</button>
+          </div> -->
+        </div>
+      </div>
+    </div>
+{% endblock %}
 
-{% endblock %}  
+{% block js %}
+  <script>
+    $(document).ready(function(){
+      $('#poll-modal-form').on('submit', function(e){
+        e.preventDefault();
+        console.log('submitted');
+        let form_data = {
+          csrfmiddlewaretoken: '{{ csrf_token }}',  // Ajoutez cette ligne
+          'title': $('#title').val(),
+          'description': $('#description').val(),
+        };
+
+        console.log(form_data);
+
+        $.ajax({
+          type: 'POST',
+          url: '{% url "polls.store" %}',
+          data: form_data,
+          success: function(response){
+            console.log(response);
+            window.location.reload();
+          },
+          error: function(error){
+            console.log(error);
+          }
+        });
+      });
+    });
+  </script>
+{% endblock %}
