@@ -46,5 +46,7 @@ def store_polls(request):
 
 # Questions views
 def manage_questions(request, id):
-    return render(request, 'questions/manage_questions.html')
+    current_poll = Poll.objects.get(id=id)
+    print(current_poll.questions.all())
+    return render(request, 'questions/manage_questions.html', {'current_poll': current_poll})
     # return HttpResponse(id)
