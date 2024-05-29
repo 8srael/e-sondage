@@ -34,7 +34,7 @@ class Type(models.Model):
 class Question(models.Model):
     label = models.CharField(max_length=250)
     type = models.ForeignKey(Type, on_delete=models.CASCADE)
-    possibilites = models.ManyToManyField('Possibility')
+    possibilities = models.ManyToManyField('Possibility', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

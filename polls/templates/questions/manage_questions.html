@@ -4,7 +4,7 @@
 {% block content %}
     <div class="container">
         <div class="row d-flex justify-content-center mt-3">
-            <div class="col-lg-6 grid-margin stretch-card">
+            <div class="col-lg-9 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">{{ current_poll.title }}</h4>
@@ -14,18 +14,35 @@
                                 {% for question in current_poll.questions.all %}
                                     <div class="card">
                                         <div class="card-header" role="tab" id="heading-2">
-                                            <h6 class="mb-0">
-                                            <a class="collapsed" data-toggle="collapse" href="#collapse-{{ question.id }}" aria-expanded="false" aria-controls="collapse-{{ question.id }}" data-abc="true">
-                                                {{ forloop.counter }} - {{ question.label }}
-                                            </a>
+                                            <h6 class="mb-0 d-flex">
+                                                <div>
+                                                    <a class="collapsed" data-toggle="collapse" href="#collapse-{{ question.id }}" aria-expanded="false" aria-controls="collapse-{{ question.id }}" data-abc="true">
+                                                        {{ forloop.counter }} - {{ question.label }}
+                                                    </a>
+                                                </div>
+
+                                                <div>
+                                                    <div class="card-description fs-6"> Type : {{ question.type.label | lower}}</div>
+                                                </div>
                                             </h6>
                                         </div>
                                         <!-- accordion contemt -->
-                                        <div id="collapse-{{ question.id }}" class="collapse" role="tabpanel" aria-labelledby="heading-2" data-parent="#accordion">
-                                            <div class="card-body">
-                                                {% if question.type != 'libre' %}
-                                            </div>
-                                        </div>
+                                        {% if question.type.label != 'Libre' %}
+                                            <div id="collapse-{{ question.id }}" class="collapse" role="tabpanel" aria-labelledby="heading-2" data-parent="#accordion">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-center">
+                                                        <ul class="list-group list-group w-50">
+                                                            {% for possibility in question.possibilities.all %}
+                                                                <li class="list-group-item text-center">
+                                                                    {{ forloop.counter }} - {{ possibility.label }}
+                                                                </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                        
+                                                </div>
+                                            </div>   
+                                        {% endif %}
                                     </div>
                                 {% endfor %}
                             </div>
