@@ -1,0 +1,18 @@
+{%  extends 'home/base.html' %}
+
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <div class="row d-flex justify-content-center mt-3">
+            <div class="card">
+                <div class="card-body">
+                    <span>Share poll {{ current_poll.title }}</span>
+                    <span class="card-description mr-4">
+                        <a href="{{ share_link }}"> {{ share_link }}</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

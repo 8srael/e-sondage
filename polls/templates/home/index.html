@@ -25,7 +25,7 @@
    
 
     <div class="text-center">
-      <a class="btn btn-dark btn-lg" id="poll-btn"  href="{% url 'polls.create' %}" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+      <a class="btn btn-dark btn-lg" id="poll-btn"  href="#" data-bs-toggle="modal" data-bs-target="#create-polls-modal">
         <i class='bx bx-heart'></i>
         <span class="links_name">
             Créer un nouveau sondage
@@ -62,7 +62,7 @@
                     <tr>
                       <td class="">{{ forloop.counter }} - <span class="fw-bold">{{ poll.title | upper }}</span></td>
                       <td class="">
-                        <a href="{% url 'poll.questions.manage' poll.id %}">
+                        <a href="{% url 'polls.questions.manage' poll.id %}">
                           <span class="badge bg_info">
                             <i class='bx bxs-heart bx-sm'></i>
                             <!-- Questions -->
@@ -86,7 +86,7 @@
                         </a>
                       </td>
                       <td class="">
-                        <a href="">
+                        <a href="javascript:void(0)" class="share-btn" data-bs-toggle="modal" data-bs-target="#share-poll-modal" data-url="{% url 'polls.share' poll.id %}">
                           <span class="badge bg_seccuss">
                             <i class='bx bxs-send bx-sm'></i>
                             <!-- Partager -->
@@ -103,8 +103,8 @@
         </div>
       </div>
     </div>
-    <!-- Modal -->
-    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <!--Create Poll Modal -->
+    <div class="modal fade" id="create-polls-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header bg-dark">
@@ -137,11 +137,53 @@
         </div>
       </div>
     </div>
+
+    <!--Share Poll Modal-->
+    <div class="modal fade" id="share-poll-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title text-secondary" id="exampleModalLongTitle">Poll details</h5>
+            <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="divider divider-primary">
+                  <div class="divider-text">Title</div>
+              </div>
+              <div class="border border-secondary p-2">
+                  <h5 class="text-secondary text-center" id="poll-title"></h5>
+              </div>
+              
+              <div class="divider divider-primary">
+                  <div class="divider-text">Description</div>
+              </div>
+              <div class="border border-secondary mt-1 p-2">
+                  <p class="h5 text-secondary text-center text-wrap" id="poll-description"></p>
+              </div>
+
+              <div class="divider divider-primary">
+                <div class="divider-text">Link</div>
+              </div>
+              <div class="border border-secondary mt-1 p-2">
+                  <div class="h5 text-secondary text-center text-wrap" id="poll-share-link"></div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
 {% endblock %}
 
 {% block js %}
+  <script src = "{% static 'bootstrap/js/bootstrap.min.js' %}" type ="text/javascript"></script>  
   <script>
     $(document).ready(function(){
+      console.log('in');
+      console.log($('#poll-modal-form'));
       $('#poll-modal-form').on('submit', function(e){
         e.preventDefault();
         console.log('submitted');
@@ -160,6 +202,24 @@
           success: function(response){
             console.log(response);
             window.location.reload();
+          },
+          error: function(error){
+            console.log(error);
+          }
+        });
+      });
+
+      $('.share-btn').on('click', function(){
+        const url = $(this).data('url');
+
+        $.ajax({
+          type: 'GET',
+          url: url,
+          success: function(response){
+            console.log(response);
+            $('#poll-title').text(response.title);
+            $('#poll-description').text(response.description);
+            $('#poll-share-link').text(response['link']);
           },
           error: function(error){
             console.log(error);

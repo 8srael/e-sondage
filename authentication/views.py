@@ -50,6 +50,10 @@ def user_register(request):
             messages.error(request, 'Les mots de passe ne correspondent pas')
             return  render(request, 'login_and_register.html', {'stay': True, 'showRegister':True, 'data': data})
 
+        # verifier si l'utilisateur existe avec le meme email ou le meme username
+        if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
+            messages.error(request, 'Cet utilisateur existe déjà')
+            return  render(request, 'login_and_register.html', {'stay': True, 'showRegister':True, 'data': data})
         user = User.objects.create_user(username=username, email=email, password=password)
         user.save() # save the user
         return redirect('login_and_register')
