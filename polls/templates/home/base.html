@@ -15,6 +15,10 @@
     <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
     <!-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> -->
     <link rel="stylesheet" href="{% static 'virtual-select/virtual-select.min.css' %}" />
+
+    <!-- Datatables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css" />
+
   </head>
   <body>
     <div class="sidebar">
@@ -54,7 +58,7 @@
           </a>
         </li>
         <li>
-          <a href="#">
+          <a href="{% url 'participants.index' %}">
             <i class='bx bxs-user-plus'></i>
             <span class="links_name">
               Participants
@@ -137,6 +141,9 @@
     <script src = "{% static 'home/main.js' %}" type ="text/javascript"></script>
     <!-- <script src = "{% static 'jquery/jquery.js' %}" type ="text/javascript"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- dataTables js -->
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
       
     {% block js %}
     {% endblock %}

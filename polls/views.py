@@ -1,18 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from polls.models import Poll, Participant, Type, Possibility
+from polls.models import Poll, Participant, Type, Possibility, Question
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 import uuid
+from polls.forms import ParticipantForm
  
 # Create your views here.
 
 @login_required
 def home(request):
     user_polls = Poll.objects.filter(user_id=request.user.id)
-    print(user_polls)
-    return render(request, 'home/index.html', {'user_polls' : user_polls})
+    participants_polls = Participant.objects.filter(user=request.user)
+    return render(request, 'home/index.html', {'user_polls' : user_polls, 'participants_polls': participants_polls})
 
 
 # @login_required
@@ -46,19 +47,99 @@ def store_polls(request):
     
 
 # Questions views
+# @login_required
+# def manage_questions(request, id):
+#     if id not in [poll.id for poll in Poll.objects.filter(user=request.user)]:
+#         return redirect('home')
+#     if request.method == 'POST':
+#         print(request.POST.get('label'), request.POST.get('type'),)
+#         form = QuestionForm(request.POST)
+#         # if form.is_valid():
+#         #     label = form.cleaned_data['label']
+#         #     type_id = form.cleaned_data['type']
+#         #     possibilities = form.cleaned_data['possibilities']
+#         #     poll = Poll.objects.get(id=id)
+#         #     question = Question(label=label, type_id=type_id)
+#         #     question.save()
+#         #     question.possibilities.set(possibilities)
+#         #     poll.questions.add(question)
+            
+#             # return redirect('polls.questions.manage', {'id':id, 'message': 'Question enregistrée avec succès'})
+#     else:
+#         print('no valid')
+#         form = QuestionForm(types=Type.objects.all(), possibilities=Possibility.objects.all())
+# 
+#   return render(request, 'questions/manage_questions.html', {'current_poll': Poll.objects.filter(user=request.user, id=id).first(), 'form':form})
+
+
 @login_required
 def manage_questions(request, id):
     if id not in [poll.id for poll in Poll.objects.filter(user=request.user)]:
         return redirect('home')
-    
+    if request.method == 'POST':
+        label = request.POST.get('label')
+        type_id = request.POST.get('type')
+        possibilities = request.POST.get('possibilities')
+        poll = Poll.objects.get(id=id)
+
+        if label and type_id:
+            question = Question(label=label, type_id=type_id)
+            question.save()
+            if possibilities:
+                possibilities = [int(possibility) for possibility in possibilities.split(',')]
+                question.possibilities.set(possibilities)
+            poll.questions.add(question)          
+            
+            return redirect('polls.questions.manage', id=id)
+        
     return render(request, 'questions/manage_questions.html', {'current_poll': Poll.objects.filter(user=request.user, id=id).first(), 'types': Type.objects.all(), 'possibilities': Possibility.objects.all()})
 
+# Possibilities json response
+@csrf_exempt
+def possibilities(request):
+    if request.method == 'POST':
+        lab = request.POST.get('lab')
+        possibility = Possibility(label=lab)        
+        possibility.save()
+        return JsonResponse({'message':'Data saved successfully'}, status=200)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+    
+    
+# participants views
+def participants(request):
+    participants = Participant.objects.filter(user=request.user)
+    print(participants)
+    if request.method == 'POST':
+        form = ParticipantForm(request.POST) 
+        if form.is_valid():
+            participant = form.save(commit=False)
+            participant.user = request.user
+            participant.token = uuid.uuid4()
+            participant.save()
+            return redirect('participants.index')
+    else:
+        form = ParticipantForm()
+    return render(request, 'participants/index.html', {'form': form, 'participants': participants})
+    
 
 # Share poll views
 @login_required
 def share_poll(request, id):
-    shareLink = request.build_absolute_uri(reverse('polls.participant.link', args=[Poll.objects.get(id=id).token]))
-    return JsonResponse({'title': Poll.objects.get(id=id).title, 'description': Poll.objects.get(id=id).description, 'link': shareLink})
+    participants = Participant.objects.filter(user=request.user)
+    informations = []
+    for participant in participants:
+        informations.append({
+            'full_name': f"{participant.last_name} {participant.first_name}",
+            'email': participant.email,
+            'link': request.build_absolute_uri(reverse('polls.respond', args=[Poll.objects.get(id=id).token, participant.token]))
+        })
+    print(informations)
+    return render(request, 'participants/share.html', {'poll': Poll.objects.get(id=id), 'informations': informations})
+# @login_required
+# def share_poll(request, id):
+#     shareLink = request.build_absolute_uri(reverse('polls.participants.link', args=[Poll.objects.get(id=id).token]))
+#     return JsonResponse({'title': Poll.objects.get(id=id).title, 'description': Poll.objects.get(id=id).description, 'link': shareLink})
 
 def participant_login(request, token):
     if request.method == 'POST':

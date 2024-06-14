@@ -2,9 +2,9 @@
 {% load static %}
 
 {% block content %}
-    <div class="container">
+    <div class="container-fluid">
         <div class="row d-flex justify-content-center mt-3">
-            <div class="col-lg-8 grid-margin stretch-card">
+            <div class="col-lg-7 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-header bg-dark">
                         <h3 class="text-light">{{ current_poll.title }}</h3>
@@ -12,6 +12,7 @@
                     </div>
                     <div class="card-body">
                         <div class="mt-2">
+                            {% if current_poll.questions.all|length > 0 %}
                             <div class="accordion" id="accordion" role="tablist">
                                 {% for question in current_poll.questions.all %}
                                     <div class="card">
@@ -33,17 +34,17 @@
                                             <div id="collapse-{{ question.id }}" class="collapse" role="tabpanel" aria-labelledby="heading-2" data-parent="#accordion">
                                                 <div class="card-body">
                                                     <div class="d-flex justify-content-center">
-                                                        {% if question.possiblities.all|length > 0 %}
+                                                        {% if question.possibilities.all|length > 0 %}
                                                             <ul class="list-group list-group w-50">
                                                                 {% for possibility in question.possibilities.all %}
                                                                     <li class="list-group-item text-center">
                                                                         {{ forloop.counter }} - {{ possibility.label }}
                                                                     </li>
                                                                 {% endfor %}
+                                                            </ul>
                                                         {% else %}
                                                             <div class="alert alert-warning" role="alert">Pas encore de possibilités choisies</div>
                                                         {% endif %}
-                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>   
@@ -51,43 +52,82 @@
                                     </div>
                                 {% endfor %}
                             </div>
+                            {% else %}
+                                <div class="alert alert-warning text-center" role="alert">Pas encore de questions enregistrées</div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-header bg-dark">
-                        <h4 class="text-center text-light">ENREGISTRER UNE QUESTION</h4>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="{% url 'polls.questions.manage' current_poll.id %}">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <input type="text" class="form-control" id="label" name="label" placeholder="Entrer le libellé de la question">
-                            </div>
-                            <div class="mb-3">
-                                <select id="question-type-select" class="form-control" name="type" data-search="true">
-                                    <option value="" disabled selected></option>
-                                    {% for type in types %}
-                                        <option value="{{ type.id }}">{{ type.label }}</option>
-                                    {% endfor %}
-                                </select> 
-                            </div>
+            <div class="d-flex justify-content-center align-items-center col-lg-5" style="height: 80vh;">
+                <div class="">
+                    <div class="card">
+                        <div class="card-header bg-dark">
+                            <h4 class="text-center text-light">ENREGISTRER UNE QUESTION</h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{% url 'polls.questions.manage' current_poll.id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" id="label" name="label" placeholder="Entrer le libellé de la question">
+                                </div>
+                                <div class="mb-3">
+                                    <select id="question-type-select" class="form-control" name="type" data-search="true">
+                                        <option value="" disabled selected></option>
+                                        {% for type in types %}
+                                            <option value="{{ type.id }}">{{ type.label }}</option>
+                                        {% endfor %}
+                                    </select> 
+                                </div>
+    
+                                <div class="mb-3" id="possibilities-container" style="display: none;">   
+                                    <div class="">
+                                        <select id="question-possibilities-select" class="form-control" name="possibilities" multiple data-search="true">
+                                            {% for possibility in possibilities %}
+                                                <option value="{{ possibility.id }}">{{ possibility.label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>                             
 
-                            <div class="mb-3">                                
-                                <select id="question-possibilities-select" class="form-control" name="possibilities[]" multiple="multiple" data-search="true">
-                                    {% for possibility in possibilities %}
-                                        <option value="{{ possibilitiy.id }}">{{ possibility.label }}</option>
-                                    {% endfor %}
-                                </select>
-
-                            </div>
-                            <button type="submit" class="btn btn-dark w-100">Submit</button>
-                        </form>
+                                    <div class="text-center form-control" data-toggle="tooltip" title="Enregistrer une option de réponse"> 
+                                        <a class="btn btn-secondary" id=""  href="javascript:void(0)" data-toggle="modal" data-target="#create-possibility-modal" >
+                                            <i class='bx bx-plus'></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-dark w-100">Submit</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Create Possibility Modal -->
+    <div class="modal fade" id="create-possibility-modal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-secondary">
+                    <button type="button" class="btn-close bg-light" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="form-container">
+                            <h3 class="text-center fw-bold">Nouvel option de reponse</h2>
+                            <form id="possibility-modal-form" method="POST">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="lab" class="form-label fw-bold">Libellé</label>
+                                    <input type="text" class="form-control" id="lab" placeholder="Entrer le libellé">
+                                </div>
+                    
+                                <button type="submit" class="btn btn-secondary w-100">Enregistrer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div> 
             </div>
         </div>
     </div>
@@ -100,13 +140,12 @@
 
     <!-- <script>
         $(document).ready(function() {
-            $('.question-type-select').select2({
+            $('#question-type-select').select2({
                 placeholder: "Choisir le type de la question"
             });
 
-            $('.question-possibilities-select').select2({
-                placeholder: "Choisir les possibilités de réponse",
-                tags: true
+            $('#question-possibilities-select').select2({
+                placeholder: "Choisir les possibilités de réponse"
             });
         });
     </script> -->
@@ -119,11 +158,63 @@
         });
         VirtualSelect.init({
             ele: '#question-possibilities-select',
-            multiple: true,
             placeholder: '--- Choisir les options de réponse ---',
-            maxWidth: '100%',
+            maxWidth: '400px',
+//            setValueAsArray: true
         });
     </script>
+
+    <script>
+        $(document).ready(function(){
+          $('#possibility-modal-form').on('submit', function(e){
+            e.preventDefault();
+            console.log('submitted');
+            let form_data = {
+              csrfmiddlewaretoken: '{{ csrf_token }}',  // Ajoutez cette ligne
+              'lab': $('#lab').val(),
+            };
+    
+            console.log(form_data);
+    
+            $.ajax({
+              type: 'POST',
+              url: '{% url "possibilities" %}',
+              data: form_data,
+              success: function(response){
+                console.log(response);
+                window.location.reload();
+              },
+              error: function(error){
+                console.log(error);
+              }
+            });
+          });
+        });
+
+        $(document).ready(function() {
+            const type_select = $('#question-type-select');
+            const p_container = $('#possibilities-container');
+        
+            console.log(p_container);
+
+            function hide_possibilities() {
+                if (type_select.val() == 1){
+                    p_container.hide();
+                }else {
+                    p_container.show();
+                    p_container.css('display', 'flex');
+                    p_container.css('justify-content', 'space-between');
+                }
+            }
+
+            // Initial check
+            hide_possibilities();
+            type_select.on('change', function() {
+                hide_possibilities();
+            });
+           
+        });
+      </script>
 
 
 {% endblock %}

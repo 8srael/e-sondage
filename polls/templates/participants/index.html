@@ -1,0 +1,71 @@
+{%  extends 'home/base.html' %}
+
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="row d-flex justify-content-center mt-3">
+        <div class="d-flex justify-content-center align-items-center col-lg-4">
+            <div class="">
+                <div class="card">
+                    <div class="card-header bg-dark">
+                        <h4 class="text-center text-light">ENREGISTRER UN PARTICIPANT</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <button type="submit" class="btn btn-dark w-100">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8 grid-margin stretch-card mt-5">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="participantsTable" class="table table-bordered text-nowrap border-bottom mb-0  border">
+                            <thead>
+                                <tr>
+                                    <th class="col">Nom</th>
+                                    <th class="col">Prenoms</th>
+                                    <th class="col">Email</th>
+                                    <th class="col">Téléphone</th>
+                                    <th class="col">Actions</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for participant in participants %}
+                                    <tr>
+                                        <td>{{ participant.last_name }}</td>
+                                        <td>{{ participant.first_name }}</td>
+                                        <td>{{ participant.email }}</td>
+                                        <td>{{ participant.phone }}</td>
+                                        <td>
+                                            <a href="" class="btn btn-secondary"> 
+                                                <i class='bx bx-pencil'></i>
+                                            </a>
+                                            <a href="" class="btn btn-dark">
+                                                <i class='bx bx-trash'></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready( function () {
+            $('#participantsTable').DataTable();
+        } );
+    </script>
+{% endblock %}

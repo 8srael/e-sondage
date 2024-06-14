@@ -8,17 +8,17 @@
           <div class="box col-md-4 my-2">
             <div class="right_side">
               <div class="numbers">{{ user_polls | length }}</div>
-              <div class="box_topic"> Total Sondages</div>
+              <div class="box_topic"> Sondages</div>
             </div>
-            <i class='bx bx-cart-alt'></i>
+            <i class='bx bx-note'></i>
           </div>
           <div class="col-md-4 my-2"></div>
-          <div class="box col-md-4">
+          <div class="box col-md-4 bg-dark">
             <div class="right_side">
-              <div class="numbers">0</div>
-              <div class="box_topic">Sondages repondus</div>
+              <div class="numbers text-white">{{ participants_polls | length }}</div>
+              <div class="box_topic text-white">Participants</div>
             </div>
-            <i class='bx bxs-cart-add'></i>
+            <i class='bx bx-user text-white'></i>
           </div>
         </div>
     </div>
@@ -86,7 +86,8 @@
                         </a>
                       </td>
                       <td class="">
-                        <a href="javascript:void(0)" class="share-btn" data-bs-toggle="modal" data-bs-target="#share-poll-modal" data-url="{% url 'polls.share' poll.id %}">
+                        <!-- <a href="javascript:void(0)" class="share-btn" data-bs-toggle="modal" data-bs-target="#share-poll-modal" data-url="{% url 'polls.share' poll.id %}"> -->
+                        <a href="{% url 'polls.share' poll.id %}" class="share-btn">
                           <span class="badge bg_seccuss">
                             <i class='bx bxs-send bx-sm'></i>
                             <!-- Partager -->

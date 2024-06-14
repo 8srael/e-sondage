@@ -34,7 +34,7 @@ class Type(models.Model):
 # question model
 class Question(models.Model):
     label = models.CharField(max_length=250)
-    type = models.ForeignKey(Type, on_delete=models.CASCADE)
+    type = models.ForeignKey('Type', on_delete=models.CASCADE)
     possibilities = models.ManyToManyField('Possibility', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -60,10 +60,14 @@ class Possibility(models.Model):
 
 # Participant model
 class Participant(models.Model):
-    poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
-    token = models.UUIDField(editable=False, unique=True)
-    has_submitted = models.BooleanField(default=False)
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=100, blank=True)
+    last_name = models.CharField(max_length=100, blank=True)
     email = models.EmailField(max_length=250, blank=True)
+    phone = models.CharField(max_length=15, blank=True)
+    token = models.UUIDField(editable=False, unique=True, blank=True, null=True)
+    has_submitted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -71,4 +75,6 @@ class Participant(models.Model):
         db_table = 'participants'
     
     def __str__(self) -> str:
-        return f"Participant (poll = {self.poll.title}), token = {self.token}), email = {self.email})"
+        if self.poll:
+            return f"Participant (poll = {self.poll.title}, token = {self.token}), email = {self.email})"
+        return f"Participant (email = {self.email})"
