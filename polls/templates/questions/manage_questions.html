@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block content %}
-    <div class="container-fluid">
-        <div class="row d-flex justify-content-center mt-3">
+    <div class="container">
+        <div class="row d-flex justify-content-center align-items-center mt-3" style="height: 80vh;">
             <div class="col-lg-7 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-header bg-dark">
@@ -52,10 +52,11 @@
                         </div>
                     </div>
                     <!-- Pagination Controls -->
-                    <div class="card-footer d-flex justify-content-end">
+                    <div class="d-flex justify-content-end m-3">
                         <div>
-                            <button type="button" id="prevPageButton" class="btn btn-secondary" onclick="showPreviousPage()"><</button>
-                            <button type="button" id="nextPageButton" class="btn btn-info" onclick="showNextPage()">></button>
+                            <span id="info"></span>
+                            <button type="button" id="prevPageButton" class="btn btn-secondary" onclick="showPreviousPage()"><i class="bx bx-chevron-left"></i></button>
+                            <button type="button" id="nextPageButton" class="btn btn-info" onclick="showNextPage()"> <i class="bx bx-chevron-right"></i></button>
                         </div>
                     </div>
                 </div>
@@ -208,6 +209,7 @@
             const totalPages = Math.ceil(totalQuestions / questionsPerPage);
 
             function updateQuestionDisplay() {
+                document.getElementById('info').innerText = `Page ${currentPage} sur ${totalPages}`;
                 document.querySelectorAll('.question').forEach((element, index) => {
                     element.style.display = 'none';
                     if (index >= (currentPage - 1) * questionsPerPage && index < currentPage * questionsPerPage) {
@@ -223,6 +225,7 @@
                 if (currentPage < totalPages) {
                     currentPage++;
                     updateQuestionDisplay();
+
                 }
             };
 
