@@ -78,6 +78,7 @@
             </div>
         </div>
 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function() {
                 let currentQuestion = 1;
@@ -104,10 +105,12 @@
                 }
         
                 window.showNextQuestion = function() {
-                    if (currentQuestion < totalQuestions) {
-                        currentQuestion++;
-                        updateQuestionDisplay();
-                    }
+                    saveCurrentAnswer(currentQuestion).then(() => {
+                        if (currentQuestion < totalQuestions) {
+                            currentQuestion++;
+                            updateQuestionDisplay();
+                        }
+                    });
                 };
         
                 window.showPreviousQuestion = function() {
@@ -124,6 +127,47 @@
                         document.querySelector('button[type="submit"]').style.display = 'none';
                     }
                 }
+
+                // answers logic with Promise
+
+                function saveCurrentAnswer(currentIndex) {
+                    return new Promise((resolve, reject) => {
+                        const currentQuestionElement = document.getElementById(`question-${currentIndex}`);
+                        const inputs = currentQuestionElement.querySelectorAll('textarea, input[type="radio"]:checked, input[type="checkbox"]:checked');
+
+                        console.log(currentQuestionElement);
+                        console.log(inputs);
+                        
+                        let form_data = {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                        }
+                        inputs.forEach(input => {
+                            form_data[input.name] = input.value;
+                        });
+                        console.log(form_data);
+                        
+                        $.ajax({
+                            url: '{% url "polls.responses.save" poll.token participant.token %}',
+                            type: 'POST',
+                            data: form_data,
+                            success: function(data) {
+                               console.log('Answer saved:', data);
+                               resolve();
+                            },
+                            error: function(error) {
+                                console.error('Error saving answer:', error);
+                                reject();
+                            }
+                        });
+                    });
+                }
+    
+                document.getElementById('questionnaire-form').addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    saveCurrentAnswer(currentQuestion).then(() => {
+                        document.getElementById('questionnaire-form').submit();
+                    });
+                });
         
                 // Initial display update
                 updateQuestionDisplay();

@@ -17,5 +17,6 @@ urlpatterns = [
     
     # share views
     path('polls/<int:id>/share', views.share_poll, name='polls.share'),
-    path('r/<uuid:token>/<uuid:key>', views.respond_poll, name='polls.respond')
+    path('r/<uuid:token>/<uuid:key>', views.respond_poll, name='polls.respond'),
+    path('r/<uuid:token>/<uuid:key>/responses/store', views.save_one, name='polls.responses.save')
 ]

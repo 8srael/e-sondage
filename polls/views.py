@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from .models import Poll, Participant, Type, Possibility, Question
+from .models import Poll, Participant, Type, Possibility, Question, QuestionPossibility
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 import uuid
@@ -147,7 +147,7 @@ def share_poll(request, id):
             'link': request.build_absolute_uri(reverse('polls.respond', args=[Poll.objects.get(id=id).token, participant.token])),
             'submitted': participant.has_submitted
         })
-    print(informations)
+    # print(informations)
     return render(request, 'participants/share.html', {'poll': Poll.objects.get(id=id), 'informations': informations})
 # @login_required
 # def share_poll(request, id):
@@ -156,12 +156,17 @@ def share_poll(request, id):
 
 
 def respond_poll(request, token, key):
-    participant = Participant.objects.filter(token=key).first()
-    if participant is None:
-        return HttpResponse("Invalid Participant", status=404)
-    
+    poll = get_object_or_404(Poll, token=token)
+    participant = get_object_or_404(Participant, token=key)
+    return render(request, 'responses/questionnaire.html', {'poll': get_object_or_404(Poll, token=token), 'participant': participant})
+
+@csrf_exempt
+def save_one(request, token, key):
+    print(request.method)
     if request.method == 'POST':
-        print(request.POST)
-    
-    return render(request, 'responses/questionnaire.html', {'poll': Poll.objects.filter(token=token).first(), 'participant': participant})    
-    # return HttpResponse(f"Token poll: {token}, Participant: {Participant.objects.filter(token=key).first().email}")
+        poll = get_object_or_404(Poll, token=token)
+        participant = get_object_or_404(Participant, token=key)
+        print(request.POST.keys())
+        return JsonResponse({'status':'Data saved successfully'}, status=200)
+    else:
+        return JsonResponse({'status':'Invalid request'}, status=400)
