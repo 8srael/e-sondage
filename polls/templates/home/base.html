@@ -22,16 +22,18 @@
   </head>
   <body>
     <div class="sidebar">
-      <div class="logo_details">
-        <!-- <i class='bx bx-code-alt'></i> -->
-        <!-- <i class='bx bx-edit'></i> -->
-        <div>
-          <img src="{% static 'home/pics/logo.png' %}" width="50" height="50">
+      <a href="{% url 'home' %}" style="text-decoration: none;">
+        <div class="logo_details">
+          <!-- <i class='bx bx-code-alt'></i> -->
+          <!-- <i class='bx bx-edit'></i> -->
+          <div>
+            <img src="{% static 'home/pics/logo.png' %}" width="50" height="50">
+          </div>
+          <div class="logo_name">
+            e-sondage
+          </div>
         </div>
-        <div class="logo_name">
-          e-sondage
-        </div>
-      </div>
+      </a>
       <ul class="p-0">
         <li>
           <a href="{% url 'home' %}" class="active">

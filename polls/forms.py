@@ -47,23 +47,28 @@ class ParticipantForm(forms.ModelForm):
             'first_name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'id': 'first_name',
-                'placeholder': 'Entrer votre prénom'
+                'placeholder': 'Entrer votre prénom',
+                'required': 'required'
             }),
             'last_name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'id': 'last_name',
-                'placeholder': 'Entrer votre nom'
+                'placeholder': 'Entrer votre nom',
+                'required': 'required'
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'form-control',
                 'id': 'email',
-                'placeholder': 'Entrer votre adresse email'
+                'placeholder': 'Entrer votre adresse email',
+                'required': 'required'
             }),
             'phone': forms.TextInput(attrs={
                 'class': 'form-control',
                 'id': 'phone',
-                'placeholder': 'Entrer votre numéro de téléphone'
+                'placeholder': 'Entrer votre numéro de téléphone',
+                'required': 'required'
             })
         }
 
-        
+class UploadFileForm(forms.Form):
+    fichier = forms.FileField(widget=forms.ClearableFileInput(attrs={'accept': '.csv, .txt, .pdf'}))

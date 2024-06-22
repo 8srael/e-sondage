@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from polls.models import Poll, Participant, Type, Possibility, Question
+from .models import Poll, Participant, Type, Possibility, Question
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 import uuid
-from polls.forms import ParticipantForm
- 
-# Create your views here.
+from .forms import ParticipantForm, UploadFileForm 
+from .utils import  handle_uploaded_file
 
+
+# Create your views here.
 @login_required
 def home(request):
     user_polls = Poll.objects.filter(user_id=request.user.id)
@@ -109,18 +110,29 @@ def possibilities(request):
 # participants views
 def participants(request):
     participants = Participant.objects.filter(user=request.user)
-    print(participants)
+    form = ParticipantForm()
+    file_form = UploadFileForm()
     if request.method == 'POST':
-        form = ParticipantForm(request.POST) 
-        if form.is_valid():
-            participant = form.save(commit=False)
-            participant.user = request.user
-            participant.token = uuid.uuid4()
-            participant.save()
-            return redirect('participants.index')
-    else:
-        form = ParticipantForm()
-    return render(request, 'participants/index.html', {'form': form, 'participants': participants})
+        if 'classic' in request.POST.keys():
+            form = ParticipantForm(request.POST) 
+            if form.is_valid():
+                print('here')
+                participant = form.save(commit=False)
+                participant.user = request.user
+                participant.token = uuid.uuid4()
+                participant.save()
+                return redirect('participants.index')
+        if 'import' in request.POST.keys(): 
+            file_form = UploadFileForm(request.POST, request.FILES)
+            if file_form.is_valid():
+                handle_uploaded_file(request.FILES['fichier'], request.user)
+                return redirect('participants.index')     
+    return render(request, 'participants/index.html', {'form': form, 'participants': participants, 'file_form' : file_form})
+
+def participant_delete(request, id):
+    participant = get_object_or_404(Participant, id=id)
+    participant.delete()    
+    return redirect('participants.index')
     
 
 # Share poll views
@@ -132,7 +144,8 @@ def share_poll(request, id):
         informations.append({
             'full_name': f"{participant.last_name} {participant.first_name}",
             'email': participant.email,
-            'link': request.build_absolute_uri(reverse('polls.respond', args=[Poll.objects.get(id=id).token, participant.token]))
+            'link': request.build_absolute_uri(reverse('polls.respond', args=[Poll.objects.get(id=id).token, participant.token])),
+            'submitted': participant.has_submitted
         })
     print(informations)
     return render(request, 'participants/share.html', {'poll': Poll.objects.get(id=id), 'informations': informations})
@@ -141,27 +154,14 @@ def share_poll(request, id):
 #     shareLink = request.build_absolute_uri(reverse('polls.participants.link', args=[Poll.objects.get(id=id).token]))
 #     return JsonResponse({'title': Poll.objects.get(id=id).title, 'description': Poll.objects.get(id=id).description, 'link': shareLink})
 
-def participant_login(request, token):
-    if request.method == 'POST':
-        email = request.POST['email']
-        print(email) 
-        poll = Poll.objects.filter(token=token).first()
-        if not email:
-            return render(request, 'participants/login.html', {'poll': Poll.objects.filter(token=token).first(), 'error': 'Email is required'})
-        participant = Participant.objects.filter(poll=poll, email=email).first()
-        if not participant:
-            participant = Participant(poll=poll, email=email, token=uuid.uuid4())
-            participant.save()
-        return redirect(reverse('polls.respond', args=[poll.token, participant.token])) 
-    
-    return render(request, 'participants/login.html', {'poll': Poll.objects.filter(token=token).first()})
-
-def generate_participant_link(request, token):
-    poll = get_object_or_404(Poll, token=token)
-    return redirect(reverse('polls.participants.login', args=[poll.token]))
 
 def respond_poll(request, token, key):
     participant = Participant.objects.filter(token=key).first()
     if participant is None:
-        return HttpResponse("Invalid participant") 
-    return HttpResponse(f"Token poll: {token}, Participant: {Participant.objects.filter(token=key).first().email}")
+        return HttpResponse("Invalid Participant", status=404)
+    
+    if request.method == 'POST':
+        print(request.POST)
+    
+    return render(request, 'responses/questionnaire.html', {'poll': Poll.objects.filter(token=token).first(), 'participant': participant})    
+    # return HttpResponse(f"Token poll: {token}, Participant: {Participant.objects.filter(token=key).first().email}")

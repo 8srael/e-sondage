@@ -16,6 +16,7 @@
                                 <tr>
                                     <th class="col">Nom & Prénoms</th>
                                     <th class="col">Link</th>
+                                    <th class="col">Status</th>
 
                                 </tr>
                             </thead>
@@ -24,6 +25,15 @@
                                     <tr>
                                         <td>{{ information.full_name }}</td>
                                         <td>{{ information.link }}</td>
+                                        {% if information.submitted %}
+                                            <td class="">
+                                                <span >Submitted</span>
+                                            </td>
+                                        {% else %}
+                                            <td class="">
+                                                <div style="width: 30px; height: 30px; border-radius: 50%; background-color: #dfdf39; text-align: center;"></div>
+                                            </td>
+                                        {% endif %}
                                     </tr>
                                 {% endfor %}
                             </tbody>

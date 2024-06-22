@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Questionnaire</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+    </style>
+</head>
+    <body class="bg-light">
+        <div class="container">
+            <div class="card">
+                <div class="card-header bg-dark d-flex justify-content-between">
+                    <div>
+                        <h3 class="text-light card-title">{{ poll.title }}</h3>
+                        <p class="card-description text-light">{{ poll.description }}</p>
+                    </div>
+                    <div>
+                        <p class="card-description text-light fw-bold">{{ participant.last_name | upper }} {{ participant.first_name }}</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-4">
+                        <div id="progress-bar" class="progress-bar progress-bar-striped bg-dark" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <form id="questionnaire-form" data-count="{{ poll.questions.all | length }}" method="post">
+                        {% csrf_token %}
+                        {% for question in poll.questions.all %}
+                            <div class="question" id="question-{{ forloop.counter }}">
+                                <h3> {{ forloop.counter  }} - {{ question.label }}</h3>
+                                {% if question.type.label == 'Libre' %}
+                                    <textarea class="form-control" name="question-{{ question.id }}"></textarea>
+                                {% elif question.type.label == 'Unique' %}
+                                    {% for possibility in question.possibilities.all %}
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input type="radio" class="form-check-input" name="question-{{ question.id }}" value="{{ possibility.id }}">
+                                                {{ possibility.label }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    {% for possibility in question.possibilities.all %}
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input type="checkbox" class="form-check-input" name="question-{{ question.id }}" value="{{ possibility.id }}">
+                                                {{ possibility.label }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %} 
+                                
+                                <div class="mt-4">
+                                    <button type="button" id="prevButton" class="btn btn-secondary previous"  onclick="showPreviousQuestion({{ forloop.counter }})">Previous</button>
+                                    <button type="button" id="nextButton" class="btn btn-dark next" onclick="showNextQuestion({{ forloop.counter}})">Next</button>
+                                </div>
+                                <!-- <button type="button" class="btn btn-primary" onclick="showNextQuestion()">Next</button>
+                                <button type="button" class="btn btn-secondary" onclick="showPreviousQuestion()">Previous</button> -->
+                            </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary mt-4" style="display: none;">Enregistrer vos réponses</button>
+                    </form>
+                </div>  
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                let currentQuestion = 1;
+                const totalQuestions = parseInt(document.getElementById('questionnaire-form').getAttribute('data-count'));
+        
+                function updateQuestionDisplay() {
+                    document.querySelectorAll('.question').forEach((element, index) => {
+                        element.classList.remove('active');
+                        if (index === currentQuestion - 1) {
+                            element.classList.add('active');
+                        }
+                    });
+        
+                    // Update buttons
+                    document.getElementById('prevButton').disabled = currentQuestion === 1;
+                    document.getElementById('nextButton').disabled = currentQuestion === totalQuestions;
+
+                     // Update progress bar
+                    const progressPercentage = (currentQuestion / totalQuestions) * 100;
+                    document.getElementById('progress-bar').style.width = `${progressPercentage}%`;
+                    document.getElementById('progress-bar').setAttribute('aria-valuenow', progressPercentage);
+        
+                    toggleSubmitButton(currentQuestion);
+                }
+        
+                window.showNextQuestion = function() {
+                    if (currentQuestion < totalQuestions) {
+                        currentQuestion++;
+                        updateQuestionDisplay();
+                    }
+                };
+        
+                window.showPreviousQuestion = function() {
+                    if (currentQuestion > 1) {
+                        currentQuestion--;
+                        updateQuestionDisplay();
+                    }
+                };
+        
+                function toggleSubmitButton(questionNumber) {
+                    if (questionNumber === totalQuestions) {
+                        document.querySelector('button[type="submit"]').style.display = 'block';
+                    } else {
+                        document.querySelector('button[type="submit"]').style.display = 'none';
+                    }
+                }
+        
+                // Initial display update
+                updateQuestionDisplay();
+            });
+        </script>
+        
+    </body>
+</html>

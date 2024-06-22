@@ -55,8 +55,8 @@
                     <div class="d-flex justify-content-end m-3">
                         <div>
                             <span id="info"></span>
-                            <button type="button" id="prevPageButton" class="btn btn-secondary" onclick="showPreviousPage()"><i class="bx bx-chevron-left"></i></button>
-                            <button type="button" id="nextPageButton" class="btn btn-info" onclick="showNextPage()"> <i class="bx bx-chevron-right"></i></button>
+                            <button type="button" id="prevPageButton" class="btn btn-dark" onclick="showPreviousPage()"><i class="bx bx-chevron-left"></i></button>
+                            <button type="button" id="nextPageButton" class="btn btn-dark" onclick="showNextPage()"> <i class="bx bx-chevron-right"></i></button>
                         </div>
                     </div>
                 </div>
@@ -80,20 +80,20 @@
                                         {% for type in types %}
                                             <option value="{{ type.id }}">{{ type.label }}</option>
                                         {% endfor %}
-                                    </select>
+                                    </select> 
                                 </div>
-
-                                <div class="mb-3" id="possibilities-container" style="display: none;">
+    
+                                <div class="mb-3" id="possibilities-container" style="display: none;">   
                                     <div class="">
                                         <select id="question-possibilities-select" class="form-control" name="possibilities" multiple data-search="true">
                                             {% for possibility in possibilities %}
                                                 <option value="{{ possibility.id }}">{{ possibility.label }}</option>
                                             {% endfor %}
                                         </select>
-                                    </div>
+                                    </div>                             
 
-                                    <div class="text-center form-control" data-toggle="tooltip" title="Enregistrer une option de réponse">
-                                        <a class="btn btn-secondary" href="javascript:void(0)" data-toggle="modal" data-target="#create-possibility-modal">
+                                    <div class="text-center form-control" data-toggle="tooltip" title="Enregistrer une option de réponse"> 
+                                        <a class="btn btn-secondary" id=""  href="javascript:void(0)" data-toggle="modal" data-target="#create-possibility-modal" >
                                             <i class='bx bx-plus'></i>
                                         </a>
                                     </div>
@@ -203,7 +203,7 @@
     <!-- Accordion with pagination js script -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const questionsPerPage = 2;
+            const questionsPerPage = 1;
             let currentPage = 1;
             const totalQuestions = document.querySelectorAll('.question').length;
             const totalPages = Math.ceil(totalQuestions / questionsPerPage);

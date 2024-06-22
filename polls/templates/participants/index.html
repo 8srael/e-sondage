@@ -14,13 +14,24 @@
                         <form method="POST" action="">
                             {% csrf_token %}
                             {{ form.as_p }}
-                            <button type="submit" class="btn btn-dark w-100">Submit</button>
+                            <button type="submit" name="manual" class="btn btn-dark w-100">Submit</button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-lg-8 grid-margin stretch-card mt-5">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="d-flex justify-content-end">
+                    {% csrf_token %}
+                    <div>
+                        {{ file_form.as_p }}
+                    </div>
+                    <div>
+                        <button type="submit" name="import" class="btn btn-dark">Importer</button>
+                    </div>
+                </div>
+            </form>
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive">
@@ -46,7 +57,7 @@
                                             <a href="" class="btn btn-secondary"> 
                                                 <i class='bx bx-pencil'></i>
                                             </a>
-                                            <a href="" class="btn btn-dark">
+                                            <a href="{% url 'participants.delete' participant.id %}" class="btn btn-dark" onclick="deleteConfirmation()">
                                                 <i class='bx bx-trash'></i>
                                             </a>
                                         </td>
@@ -64,6 +75,10 @@
 
 {% block js %}
     <script>
+
+        function deleteConfirmation() {
+            return window.confirm('Voulez-vous supprimer ce participant ?')
+        }
         $(document).ready( function () {
             $('#participantsTable').DataTable();
         } );
