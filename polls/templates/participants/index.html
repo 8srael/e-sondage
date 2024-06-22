@@ -11,7 +11,7 @@
                         <h4 class="text-center text-light">ENREGISTRER UN PARTICIPANT</h4>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="">
+                        <form method="POST">
                             {% csrf_token %}
                             {{ form.as_p }}
                             <button type="submit" name="manual" class="btn btn-dark w-100">Submit</button>

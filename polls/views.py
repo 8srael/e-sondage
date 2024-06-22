@@ -113,7 +113,7 @@ def participants(request):
     form = ParticipantForm()
     file_form = UploadFileForm()
     if request.method == 'POST':
-        if 'classic' in request.POST.keys():
+        if 'manual' in request.POST.keys():
             form = ParticipantForm(request.POST) 
             if form.is_valid():
                 print('here')
