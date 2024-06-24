@@ -15,7 +15,7 @@
                             <thead>
                                 <tr>
                                     <th class="col">Nom & Prénoms</th>
-                                    <th class="col">Link</th>
+                                    <th class="col">Lien</th>
                                     <th class="col">Status</th>
 
                                 </tr>
@@ -23,15 +23,29 @@
                             <tbody>
                                 {% for information in informations %}
                                     <tr>
-                                        <td>{{ information.full_name }}</td>
-                                        <td>{{ information.link }}</td>
+                                        <td>
+                                            <span class="badge bg_danger">
+                                                {{ information.full_name }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg_info">
+                                                {{ information.link }}
+                                            </span>
+                                        </td>
                                         {% if information.submitted %}
-                                            <td class="">
-                                                <span >Submitted</span>
+                                            <td>
+                                                <span class="badge bg_seccuss">
+                                                    <!-- <i class='bx bxs-send bx-sm'></i> -->
+                                                    Submitted
+                                                  </span>
                                             </td>
                                         {% else %}
-                                            <td class="">
-                                                <div style="width: 30px; height: 30px; border-radius: 50%; background-color: #dfdf39; text-align: center;"></div>
+                                            <td class="text-center">
+                                                <span class="badge bg-warning">
+                                                    <!-- <i class='bx bxs-send bx-sm'></i> -->
+                                                    <!-- Partager -->Pending
+                                                  </span>
                                             </td>
                                         {% endif %}
                                     </tr>

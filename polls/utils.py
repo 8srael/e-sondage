@@ -1,6 +1,7 @@
 import csv
 import uuid
 from .models import Participant
+import re
 
 def handle_uploaded_file(file, user):
     if file.name.endswith('.csv'):
@@ -40,3 +41,10 @@ def create_participant(row, user):
         'token': uuid.uuid4(),
         'phone': phone
     })
+
+def extract_number(string):
+    match = re.search(r'\d+', string)
+    if match:
+        return int(match.group())
+    else:
+        return None

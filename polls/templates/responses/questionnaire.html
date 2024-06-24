@@ -43,12 +43,12 @@
                             <div class="question" id="question-{{ forloop.counter }}">
                                 <h3> {{ forloop.counter  }} - {{ question.label }}</h3>
                                 {% if question.type.label == 'Libre' %}
-                                    <textarea class="form-control" name="question-{{ question.id }}"></textarea>
+                                    <textarea class="form-control" name="question-{{ question.type.label | lower }}-{{ question.id }}"> {% if answered_questions|get_item:question.id != None %}{{ answered_questions|get_item:question.id }} {% endif %}</textarea>
                                 {% elif question.type.label == 'Unique' %}
                                     {% for possibility in question.possibilities.all %}
                                         <div class="form-check">
                                             <label class="form-check-label">
-                                                <input type="radio" class="form-check-input" name="question-{{ question.id }}" value="{{ possibility.id }}">
+                                                <input type="radio" class="form-check-input" name="question-{{ question.type.label | lower }}-{{ question.id }}" value="{{ possibility.id }}" {% if answered_questions|get_item:question.id == possibility.id %}checked{% endif %}>
                                                 {{ possibility.label }}
                                             </label>
                                         </div>
@@ -57,22 +57,20 @@
                                     {% for possibility in question.possibilities.all %}
                                         <div class="form-check">
                                             <label class="form-check-label">
-                                                <input type="checkbox" class="form-check-input" name="question-{{ question.id }}" value="{{ possibility.id }}">
+                                                <input type="checkbox" class="form-check-input" name="question-{{ question.type.label | lower }}-{{ question.id }}" value="{{ possibility.id }}" {% if answered_questions|get_item:question.id == possibility.id %}checked{% endif %}>
                                                 {{ possibility.label }}
                                             </label>
                                         </div>
                                     {% endfor %}
                                 {% endif %} 
                                 
-                                <div class="mt-4">
-                                    <button type="button" id="prevButton" class="btn btn-secondary previous"  onclick="showPreviousQuestion({{ forloop.counter }})">Previous</button>
-                                    <button type="button" id="nextButton" class="btn btn-dark next" onclick="showNextQuestion({{ forloop.counter}})">Next</button>
-                                </div>
-                                <!-- <button type="button" class="btn btn-primary" onclick="showNextQuestion()">Next</button>
-                                <button type="button" class="btn btn-secondary" onclick="showPreviousQuestion()">Previous</button> -->
                             </div>
                         {% endfor %}
-                        <button type="submit" class="btn btn-primary mt-4" style="display: none;">Enregistrer vos réponses</button>
+                        <div class="mt-4">
+                            <button type="button" id="prevButton" class="btn btn-secondary"  onclick="showPreviousQuestion({{ forloop.counter }})">Previous</button>
+                            <button type="button" id="nextButton" class="btn btn-dark" onclick="showNextQuestion({{ forloop.counter}})">Next</button>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-4">Enregistrer vos réponses</button>
                     </form>
                 </div>  
             </div>
@@ -83,7 +81,6 @@
             document.addEventListener("DOMContentLoaded", function() {
                 let currentQuestion = 1;
                 const totalQuestions = parseInt(document.getElementById('questionnaire-form').getAttribute('data-count'));
-        
                 function updateQuestionDisplay() {
                     document.querySelectorAll('.question').forEach((element, index) => {
                         element.classList.remove('active');
@@ -91,10 +88,10 @@
                             element.classList.add('active');
                         }
                     });
-        
-                    // Update buttons
-                    document.getElementById('prevButton').disabled = currentQuestion === 1;
-                    document.getElementById('nextButton').disabled = currentQuestion === totalQuestions;
+                    
+                    // Update buttons prev et next disabled attr
+                    document.getElementById('prevButton').disabled = currentQuestion == 1;
+                    document.getElementById('nextButton').disabled = currentQuestion == totalQuestions;
 
                      // Update progress bar
                     const progressPercentage = (currentQuestion / totalQuestions) * 100;
@@ -123,26 +120,34 @@
                 function toggleSubmitButton(questionNumber) {
                     if (questionNumber === totalQuestions) {
                         document.querySelector('button[type="submit"]').style.display = 'block';
+                    //    document.querySelector('button[type="submit"]').setAttribute('name', 'submitted');
                     } else {
                         document.querySelector('button[type="submit"]').style.display = 'none';
                     }
                 }
 
                 // answers logic with Promise
-
                 function saveCurrentAnswer(currentIndex) {
                     return new Promise((resolve, reject) => {
                         const currentQuestionElement = document.getElementById(`question-${currentIndex}`);
                         const inputs = currentQuestionElement.querySelectorAll('textarea, input[type="radio"]:checked, input[type="checkbox"]:checked');
 
                         console.log(currentQuestionElement);
-                        console.log(inputs);
+                        //console.log(inputs); 
                         
                         let form_data = {
                             csrfmiddlewaretoken: '{{ csrf_token }}',
                         }
                         inputs.forEach(input => {
-                            form_data[input.name] = input.value;
+                            console.log(input.type);
+                            if(input.type == 'checkbox'){
+                                if(!form_data[input.name]) {
+                                    form_data[input.name] = [];
+                                }
+                                form_data[input.name].push(input.value);
+                            } else {
+                                form_data[input.name] = input.value;
+                            }
                         });
                         console.log(form_data);
                         
@@ -162,9 +167,11 @@
                     });
                 }
     
+                // final button submit logic
                 document.getElementById('questionnaire-form').addEventListener('submit', function(event) {
                     event.preventDefault();
                     saveCurrentAnswer(currentQuestion).then(() => {
+                      //  document.querySelector('button[type="submit"]').setAttribute('name', 'submitted');
                         document.getElementById('questionnaire-form').submit();
                     });
                 });

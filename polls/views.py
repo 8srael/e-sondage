@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from .models import Poll, Participant, Type, Possibility, Question, QuestionPossibility
+from .models import Poll, Participant, Type, Possibility, Question, QuestionPossibility, Answer
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 import uuid
 from .forms import ParticipantForm, UploadFileForm 
-from .utils import  handle_uploaded_file
+from .utils import  handle_uploaded_file, extract_number
+from django.template.defaulttags import register
 
 
 # Create your views here.
@@ -82,13 +83,14 @@ def manage_questions(request, id):
         type_id = request.POST.get('type')
         possibilities = request.POST.get('possibilities')
         poll = Poll.objects.get(id=id)
-
         if label and type_id:
             question = Question(label=label, type_id=type_id)
             question.save()
             if possibilities:
                 possibilities = [int(possibility) for possibility in possibilities.split(',')]
                 question.possibilities.set(possibilities)
+            else: # if no possibilities are selected, create a QuestionPossibility object with question and null possibility for free type question
+                QuestionPossibility.objects.create(question=question)
             poll.questions.add(question)          
             
             return redirect('polls.questions.manage', id=id)
@@ -156,17 +158,60 @@ def share_poll(request, id):
 
 
 def respond_poll(request, token, key):
-    poll = get_object_or_404(Poll, token=token)
     participant = get_object_or_404(Participant, token=key)
-    return render(request, 'responses/questionnaire.html', {'poll': get_object_or_404(Poll, token=token), 'participant': participant})
+    poll = get_object_or_404(Poll, token=token)
+    
+    # recupérer les questions et les réponses deja enregistrées avant soumission
+    questions = poll.questions.all()
+    answers = Answer.objects.filter(participant=participant)
+    print(questions)
+    print(answers)
+    
+    answered_questions = {}
+    
+    for answer in answers:
+        if not answer.question_possibility.possibility:
+            answered_questions[answer.question_possibility.question.id] = answer.content
+        else:
+            answered_questions[answer.question_possibility.question.id] = answer.question_possibility.possibility.id
+            
+    print(answered_questions)
+    
+    
+    if request.method == 'POST':
+        print(participant)
+        participant.has_submitted = True
+        participant.save()
+        # print('in respond_poll method', request.POST.keys(), 'submitted' in request.POST.keys())
+        return HttpResponse('<h2 class="text-center">Merci pour votre participation</h2>')
+    if participant.has_submitted:
+        return HttpResponse('<h2 class="text-center">Vous avez déjà soumis vos réponses</h2>')
+    return render(request, 'responses/questionnaire.html', {'poll': get_object_or_404(Poll, token=token), 'participant':  get_object_or_404(Participant, token=key), 'answered_questions': answered_questions})
 
 @csrf_exempt
 def save_one(request, token, key):
-    print(request.method)
     if request.method == 'POST':
+        print('in save_one method', request.POST.keys())
         poll = get_object_or_404(Poll, token=token)
         participant = get_object_or_404(Participant, token=key)
-        print(request.POST.keys())
+        for key in request.POST:
+            if key.startswith('question'):
+                question_id = extract_number(key)
+                values = request.POST.getlist(key)
+                question = get_object_or_404(Question, id=question_id)
+                if "libre" not in key:
+                    for value in values:
+                        question_possibility = get_object_or_404(QuestionPossibility, question=question, possibility=int(value))
+                        print(question_possibility)
+                        # Answer.objects.create(question_possibiity=question_possibility, participant=participant)
+                else:
+                    print(values)
+                    # Answer.objects.create(participant=participant, content=values[0])
         return JsonResponse({'status':'Data saved successfully'}, status=200)
     else:
         return JsonResponse({'status':'Invalid request'}, status=400)
+    
+# custom template tags
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)

@@ -62,7 +62,7 @@ class Possibility(models.Model):
 # intermediary table betwenn question and possibility
 class QuestionPossibility(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    possibility = models.ForeignKey(Possibility, on_delete=models.CASCADE)
+    possibility = models.ForeignKey(Possibility, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -71,6 +71,8 @@ class QuestionPossibility(models.Model):
         verbose_name_plural = "Questions-Possibilities"
     
     def __str__(self) -> str:
+        if not self.possibility:
+            return f"QuestionPossibility (question = {self.question.label}, possibility = None)"
         return f"QuestionPossibility (question = {self.question.label}, possibility = {self.possibility.label})"
     
 
@@ -96,7 +98,7 @@ class Participant(models.Model):
         return f"Participant (email = {self.email})"
     
 class Answer(models.Model):
-    question_possibiity = models.ForeignKey(QuestionPossibility, on_delete=models.CASCADE, null=True, blank=True)
+    question_possibility = models.ForeignKey(QuestionPossibility, on_delete=models.CASCADE, null=True, blank=True)
     participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
     content = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -104,3 +106,9 @@ class Answer(models.Model):
     
     class Meta:
         db_table = 'answers'
+        
+    def __str__(self) -> str:
+        if not self.question_possibility.possibility:
+            return f"Answer (participant = {self.participant.last_name}, question = {self.question_possibility.question} content = {self.content})"
+        else :
+            return f"Answer (participant = {self.participant.last_name}, question = {self.question_possibility.question} possibility = {self.question_possibility})"
