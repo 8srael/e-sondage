@@ -188,8 +188,8 @@ def respond_poll(request, token, key):
     
     if request.method == 'POST':
         print(participant)
-        # participant.has_submitted = True
-        # participant.save()
+        participant.has_submitted = True
+        participant.save()
         # print('in respond_poll method', request.POST.keys(), 'submitted' in request.POST.keys())
         return HttpResponse('<h2 style="text-align:center;">🙏🏽Merci pour votre participation🙏🏽</h2>')
     if participant.has_submitted:
@@ -205,17 +205,36 @@ def save_one(request, token, key):
         for key in request.POST:
             if key.startswith('question'):
                 question_id = extract_number(key)
-                values = request.POST.getlist(key)
                 question = get_object_or_404(Question, id=question_id)
+                values = request.POST.getlist(key)
+                # values =  request.POST.getlist(key) if (question.type.label == 'Multiple') else request.POST.get(key)
+                print(values) 
+                
                 if "libre" not in key:
+                    Answer.objects.filter(participant=participant, question_possibility__question=question).delete()
                     for value in values:
                         question_possibility = get_object_or_404(QuestionPossibility, question=question, possibility=int(value))
                         print(question_possibility)
                         Answer.objects.create(question_possibility=question_possibility, participant=participant)
                 else:
                     question_possibility = get_object_or_404(QuestionPossibility, question=question)
-                    print(question_possibility)
-                    Answer.objects.create(participant=participant, question_possibility=question_possibility, content=values[0])
+                    answer, created = Answer.objects.get_or_create(participant=participant, question_possibility=question_possibility, defaults={'content': values[0]})
+                   
+                    if not created:
+                       answer.content = values[0]
+                       answer.save()
+                
+                                                     
+                
+                # if "libre" not in key:
+                #     for value in values:
+                #         question_possibility = get_object_or_404(QuestionPossibility, question=question, possibility=int(value))
+                #         print(question_possibility)
+                #         Answer.objects.create(question_possibility=question_possibility, participant=participant)
+                # else:
+                #     question_possibility = get_object_or_404(QuestionPossibility, question=question)
+                #     print(question_possibility)
+                #     Answer.objects.create(participant=participant, question_possibility=question_possibility, content=values[0])
         return JsonResponse({'status':'Saved successfully'}, status=200)
     else:
         return JsonResponse({'status':'Invalid request'}, status=400)
