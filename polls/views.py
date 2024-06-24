@@ -164,29 +164,37 @@ def respond_poll(request, token, key):
     # recupérer les questions et les réponses deja enregistrées avant soumission
     questions = poll.questions.all()
     answers = Answer.objects.filter(participant=participant)
-    print(questions)
-    print(answers)
     
     answered_questions = {}
-    
     for answer in answers:
         if not answer.question_possibility.possibility:
             answered_questions[answer.question_possibility.question.id] = answer.content
         else:
-            answered_questions[answer.question_possibility.question.id] = answer.question_possibility.possibility.id
-            
-    print(answered_questions)
+            if answer.question_possibility.question.id not in answered_questions.keys():
+                answered_questions[answer.question_possibility.question.id] = [answer.question_possibility.possibility.id]
+                print(answer.question_possibility)
+            else:
+                answered_questions[answer.question_possibility.question.id].append(answer.question_possibility.possibility.id)
+                print(answer.question_possibility)         
+    print('answered_questions :', answered_questions)   
+     # Trouver la première question non répondue
+    first_unanswered_index = 1
+    for index, question in enumerate(questions, start=1):
+        if question.id not in answered_questions:
+            first_unanswered_index = index
+            break
+    print('first_answered_index : ',first_unanswered_index)
     
     
     if request.method == 'POST':
         print(participant)
-        participant.has_submitted = True
-        participant.save()
+        # participant.has_submitted = True
+        # participant.save()
         # print('in respond_poll method', request.POST.keys(), 'submitted' in request.POST.keys())
-        return HttpResponse('<h2 class="text-center">Merci pour votre participation</h2>')
+        return HttpResponse('<h2 style="text-align:center;">🙏🏽Merci pour votre participation🙏🏽</h2>')
     if participant.has_submitted:
-        return HttpResponse('<h2 class="text-center">Vous avez déjà soumis vos réponses</h2>')
-    return render(request, 'responses/questionnaire.html', {'poll': get_object_or_404(Poll, token=token), 'participant':  get_object_or_404(Participant, token=key), 'answered_questions': answered_questions})
+        return HttpResponse('<h2 style="text-align:center;">⚠ Oups😅Vous avez déjà soumis vos réponses ⚠</h2>')
+    return render(request, 'responses/questionnaire.html', {'poll': get_object_or_404(Poll, token=token), 'participant':  get_object_or_404(Participant, token=key), 'answered_questions': answered_questions, 'first_unanswered_index': first_unanswered_index})
 
 @csrf_exempt
 def save_one(request, token, key):
@@ -203,11 +211,12 @@ def save_one(request, token, key):
                     for value in values:
                         question_possibility = get_object_or_404(QuestionPossibility, question=question, possibility=int(value))
                         print(question_possibility)
-                        # Answer.objects.create(question_possibiity=question_possibility, participant=participant)
+                        Answer.objects.create(question_possibility=question_possibility, participant=participant)
                 else:
-                    print(values)
-                    # Answer.objects.create(participant=participant, content=values[0])
-        return JsonResponse({'status':'Data saved successfully'}, status=200)
+                    question_possibility = get_object_or_404(QuestionPossibility, question=question)
+                    print(question_possibility)
+                    Answer.objects.create(participant=participant, question_possibility=question_possibility, content=values[0])
+        return JsonResponse({'status':'Saved successfully'}, status=200)
     else:
         return JsonResponse({'status':'Invalid request'}, status=400)
     

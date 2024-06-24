@@ -37,27 +37,18 @@
                     <div class="progress mb-4">
                         <div id="progress-bar" class="progress-bar progress-bar-striped bg-dark" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
-                    <form id="questionnaire-form" data-count="{{ poll.questions.all | length }}" method="post">
+                    <form id="questionnaire-form" data-count="{{ poll.questions.all | length }}" data-first_unanswered_index="{{ first_unanswered_index }}" method="post">
                         {% csrf_token %}
                         {% for question in poll.questions.all %}
                             <div class="question" id="question-{{ forloop.counter }}">
                                 <h3> {{ forloop.counter  }} - {{ question.label }}</h3>
                                 {% if question.type.label == 'Libre' %}
-                                    <textarea class="form-control" name="question-{{ question.type.label | lower }}-{{ question.id }}"> {% if answered_questions|get_item:question.id != None %}{{ answered_questions|get_item:question.id }} {% endif %}</textarea>
-                                {% elif question.type.label == 'Unique' %}
-                                    {% for possibility in question.possibilities.all %}
-                                        <div class="form-check">
-                                            <label class="form-check-label">
-                                                <input type="radio" class="form-check-input" name="question-{{ question.type.label | lower }}-{{ question.id }}" value="{{ possibility.id }}" {% if answered_questions|get_item:question.id == possibility.id %}checked{% endif %}>
-                                                {{ possibility.label }}
-                                            </label>
-                                        </div>
-                                    {% endfor %}
+                                    <textarea class="form-control" name="question-{{ question.type.label | lower }}-{{ question.id }}" required> {% if answered_questions|get_item:question.id != None %}{{ answered_questions|get_item:question.id }} {% endif %}</textarea>
                                 {% else %}
                                     {% for possibility in question.possibilities.all %}
-                                        <div class="form-check">
+                                        <div class="form-check" >
                                             <label class="form-check-label">
-                                                <input type="checkbox" class="form-check-input" name="question-{{ question.type.label | lower }}-{{ question.id }}" value="{{ possibility.id }}" {% if answered_questions|get_item:question.id == possibility.id %}checked{% endif %}>
+                                                <input type="{% if question.type.label == 'Unique' %}radio{% else %}checkbox{% endif %}" class="form-check-input" name="question-{{ question.type.label | lower }}-{{ question.id }}" value="{{ possibility.id }}" {% if possibility.id in answered_questions|get_item:question.id %} checked {% endif %}>
                                                 {{ possibility.label }}
                                             </label>
                                         </div>
@@ -79,7 +70,8 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function() {
-                let currentQuestion = 1;
+                let currentQuestion = parseInt($('#questionnaire-form').data('first_unanswered_index'));
+                console.log(currentQuestion);
                 const totalQuestions = parseInt(document.getElementById('questionnaire-form').getAttribute('data-count'));
                 function updateQuestionDisplay() {
                     document.querySelectorAll('.question').forEach((element, index) => {
@@ -171,7 +163,6 @@
                 document.getElementById('questionnaire-form').addEventListener('submit', function(event) {
                     event.preventDefault();
                     saveCurrentAnswer(currentQuestion).then(() => {
-                      //  document.querySelector('button[type="submit"]').setAttribute('name', 'submitted');
                         document.getElementById('questionnaire-form').submit();
                     });
                 });
