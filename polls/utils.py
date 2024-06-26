@@ -1,6 +1,6 @@
 import csv
 import uuid
-from .models import Participant
+from .models import Participant, Answer, QuestionPossibility
 import re
 
 def handle_uploaded_file(file, user):
@@ -48,3 +48,20 @@ def extract_number(string):
         return int(match.group())
     else:
         return None
+    
+    
+def poll_questions_stats(poll):
+    question_stats = []
+    for question in poll.questions.all():
+        stats = {'question': question.label, 'type': question.type.label, 'responses': {}}
+        
+        if question.type.label == 'Libre':
+            answers = Answer.objects.filter(question_possibility__question=question)
+            stats['responses'] = [answer.content for answer in answers]
+        else:
+            possibilities = QuestionPossibility.objects.filter(question=question)
+            for possibility in possibilities:
+                label = possibility.possibility.label if possibility.possibility else 'None'
+                stats['responses'][label] = Answer.objects.filter(question_possibility=possibility).count()
+        question_stats.append(stats)
+    return question_stats

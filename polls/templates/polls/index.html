@@ -1,0 +1,82 @@
+{% extends 'home/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="crad-header bg-dark text-white">
+                        <h3 class="text-center mt-3">Liste de tous les sondages</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="pollsTable" class="table table-bordered text-nowrap border-bottom mb-0 border">
+                                <thead>
+                                    <tr>
+                                        <th>N°</th>
+                                        <th>Titre</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for poll in polls %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ poll.title }}</td>
+                                            <td>
+                                                <div class="d-flex justify-content-around">
+                                                    <div>
+                                                        <a href="{% url 'polls.questions.manage' poll.id %}">
+                                                            <span class="badge bg_info">
+                                                            <i class='bx bxs-heart bx-sm'></i>
+                                                            <!-- Questions -->
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                
+                                                    <div>
+                                                        <a href="">
+                                                            <span class="badge bg_danger">
+                                                            <i class='bx bxs-trash bx-sm'></i>
+                                                            <!-- Supprimer -->
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                
+                                                    <div>
+                                                        <a href="">
+                                                            <span class="badge bg_worning">
+                                                            <i class='bx bxs-pencil bx-sm'></i>
+                                                            <!-- Modifier -->
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                
+                                                    <div>
+                                                        <a href="{% url 'polls.share' poll.id %}" class="share-btn">
+                                                            <span class="badge bg_seccuss">
+                                                            <i class='bx bxs-send bx-sm'></i>
+                                                            <!-- Partager -->
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <!-- <a href="javascript:void(0)" class="share-btn" data-bs-toggle="modal" data-bs-target="#share-poll-modal" data-url="{% url 'polls.share' poll.id %}"> -->
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#pollsTable').DataTable();
+        });
+    </script>
+{% endblock %}

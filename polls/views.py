@@ -13,7 +13,8 @@ from django.template.defaulttags import register
 # Create your views here.
 @login_required
 def home(request):
-    user_polls = Poll.objects.filter(user_id=request.user.id)
+    user_polls = Poll.objects.filter(user=request.user).order_by('-created_at')[:5]
+    
     participants_polls = Participant.objects.filter(user=request.user)
     return render(request, 'home/index.html', {'user_polls' : user_polls, 'participants_polls': participants_polls})
 
@@ -46,6 +47,11 @@ def store_polls(request):
         return JsonResponse({'message':'Data saved successfully'}, status=200)
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@login_required
+def polls(request):
+    polls = Poll.objects.filter(user=request.user)
+    return render(request, 'polls/index.html', {'polls': polls})
     
 
 # Questions views
@@ -151,10 +157,6 @@ def share_poll(request, id):
         })
     # print(informations)
     return render(request, 'participants/share.html', {'poll': Poll.objects.get(id=id), 'informations': informations})
-# @login_required
-# def share_poll(request, id):
-#     shareLink = request.build_absolute_uri(reverse('polls.participants.link', args=[Poll.objects.get(id=id).token]))
-#     return JsonResponse({'title': Poll.objects.get(id=id).title, 'description': Poll.objects.get(id=id).description, 'link': shareLink})
 
 
 def respond_poll(request, token, key):
@@ -176,7 +178,8 @@ def respond_poll(request, token, key):
             else:
                 answered_questions[answer.question_possibility.question.id].append(answer.question_possibility.possibility.id)
                 print(answer.question_possibility)         
-    print('answered_questions :', answered_questions)   
+    print('answered_questions :', answered_questions)
+      
      # Trouver la première question non répondue
     first_unanswered_index = 1
     for index, question in enumerate(questions, start=1):
@@ -223,9 +226,6 @@ def save_one(request, token, key):
                     if not created:
                        answer.content = values[0]
                        answer.save()
-                
-                                                     
-                
                 # if "libre" not in key:
                 #     for value in values:
                 #         question_possibility = get_object_or_404(QuestionPossibility, question=question, possibility=int(value))
@@ -243,3 +243,48 @@ def save_one(request, token, key):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+# def pList(request):
+#     return render(request, 'participants/list.html', {'participants': Participant.objects.all()}
+
+# statistics views
+def stats(request):
+    polls = Poll.objects.filter(user=request.user)
+    selected_poll = Poll.objects.latest('created_at')   
+    return render(request, 'statistics/index.html', {
+        'polls': polls,
+        'selected_poll': selected_poll,
+    })
+    
+def stats_data(request, id):
+    polls = Poll.objects.filter(user=request.user)
+    selected_poll = get_object_or_404(Poll, id=id)
+    questions = selected_poll.questions.all()
+    question_stats = []
+    
+    for question in questions:
+        stats = {'question': question.label, 'type': question.type.label, 'responses': {}}
+        
+        if question.type.label == 'Libre':
+            answers = Answer.objects.filter(question_possibility__question=question)
+            stats['responses'] = [answer.content for answer in answers]
+        else:
+            possibilities = QuestionPossibility.objects.filter(question=question)
+            for possibility in possibilities:
+                label = possibility.possibility.label if possibility.possibility else 'None'
+                stats['responses'][label] = Answer.objects.filter(question_possibility=possibility).count()
+        
+        question_stats.append(stats) 
+        
+    print(len(question_stats))
+        
+    return JsonResponse({
+        'poll': {'title': selected_poll.title, 'description': selected_poll.description},
+        'question_stats': question_stats,
+    })       
+    # return render(request, 'statistics/index.html', {
+    #     'polls': polls,
+    #     'selected_poll': selected_poll,
+    #     'question_stats': question_stats,
+    # })

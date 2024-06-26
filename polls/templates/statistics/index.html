@@ -1,0 +1,118 @@
+{% extends 'home/base.html' %}
+{% load static %}
+
+{% block hjs %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="d-flex justify-content-center">
+            <select id="poll-select">
+                <!-- <option value="">Select a poll</option> -->
+                {% for poll in polls %}
+                    {% if selected_poll.id == poll.id %}
+                        <option value="{{ poll.id }}" selected>{{ poll.title }}</option>
+                    {% else %}
+                        <option value="{{ poll.id }}">{{ poll.title }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+
+       <div id="statistics-container"></div>
+
+       <script>
+        $(document).ready(function() {
+            VirtualSelect.init({
+                ele: '#poll-select',
+                search : true
+            });
+            $('#poll-select').change(function() {
+                const poll_id = $(this).val();
+                showData(poll_id);
+            });
+        });
+
+        function showData(id) {
+            if (id) {
+                $.ajax({
+                    url: '/polls/' + id + '/statistics/data',
+                    method: 'GET',
+                    success: function(data) {
+                        $('#statistics-container').empty();
+
+                        let big_card = $('<div class="card mt-4"></div>');
+                        let big_card_header = $('<div class="card-header bg-dark text-white"></div>');
+                        let big_card_body = $('<div class="card-body"></div>');
+        
+                        big_card_header.append('<h3>' + data.poll.title + ' - Statistiques</h3>');
+                        big_card_header.append('<p>' + data.poll.description + '</p>');
+
+                        big_card.append(big_card_header);
+                        
+                        $('#statistics-container').append(big_card);
+
+                        if (data.question_stats.length === 0) {
+                            big_card_body.append('<div class="alert alert-warning text-center">Statistiques non disponibles pour l\'instant</div>');
+                            big_card.append(big_card_body);
+                        } else {
+                            data.question_stats.forEach(function(qstat, index) {
+                            let card = $('<div class="card mt-4"></div>');
+                            let cardHeader = $('<div class="card-header"><h5>'+ (index + 1) + '-' + qstat.question + '</h5></div>');
+                            let cardBody = $('<div class="card-body"></div>');
+                            if (qstat.type === 'Libre') {
+                                let ul = $('<ul></ul>');
+                                qstat.responses.forEach(function(response) {
+                                    ul.append('<li>' + response + '</li>');
+                                });
+                                cardBody.append(ul);
+                            } else {
+                                let canvas = $('<canvas id="chart-' + index + '" width="400" height="200"></canvas>');
+                                cardBody.append(canvas);
+                                let ctx = canvas[0].getContext('2d');
+                                new Chart(ctx, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: Object.keys(qstat.responses),
+                                        datasets: [{
+                                            label: 'Responses',
+                                            data: Object.values(qstat.responses),
+                                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                            borderColor: 'rgba(54, 162, 235, 1)',
+                                            borderWidth: 1
+                                        }]
+                                    },
+                                    options: {
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true,
+                                                ticks: {
+                                                    stepSize: 1
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                            card.append(cardHeader);
+                            card.append(cardBody);
+                            big_card_body.append(card);
+                            big_card.append(big_card_body);
+                        });
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error fetching poll statistics:', error);
+                    }
+                });
+            }
+        }
+
+        showData($('#poll-select').val());
+    </script>
+
+    {% block js %}
+        <script src="{% static 'virtual-select/virtual-select.min.js' %}"></script>
+    {% endblock %}
+{% endblock %}

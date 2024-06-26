@@ -4,8 +4,8 @@
 {% block content %}
 <div class="container">
     <div class="row d-flex justify-content-center mt-3">
-        <div class="d-flex justify-content-center align-items-center col-lg-4">
-            <div class="">
+        <div class="d-flex justify-content-center align-items-center col-lg-4 ">
+            <div class=""  id="manual-form">
                 <div class="card">
                     <div class="card-header bg-dark">
                         <h4 class="text-center text-light">ENREGISTRER UN PARTICIPANT</h4>
@@ -35,9 +35,11 @@
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="participantsTable" class="table table-bordered text-nowrap border-bottom mb-0  border">
+                        <table id="participantsTable" class="table table-bordered text-nowrap border-bottom mb-0 border">
                             <thead>
                                 <tr>
+                                    
+                                    <!-- <th class="col">N°</th> -->
                                     <th class="col">Nom</th>
                                     <th class="col">Prenoms</th>
                                     <th class="col">Email</th>
@@ -49,6 +51,7 @@
                             <tbody>
                                 {% for participant in participants %}
                                     <tr>
+                                        <!-- <td>{{ forloop.counter }}</td> -->
                                         <td>{{ participant.last_name }}</td>
                                         <td>{{ participant.first_name }}</td>
                                         <td>{{ participant.email }}</td>
@@ -57,7 +60,7 @@
                                             <a href="" class="btn btn-secondary"> 
                                                 <i class='bx bx-pencil'></i>
                                             </a>
-                                            <a href="{% url 'participants.delete' participant.id %}" class="btn btn-dark" onclick="deleteConfirmation()">
+                                            <a href="{% url 'participants.delete' participant.id %}" class="btn btn-dark" onclick="deleteConfirmation(event, this.href)">
                                                 <i class='bx bx-trash'></i>
                                             </a>
                                         </td>
@@ -74,13 +77,20 @@
 {% endblock %}
 
 {% block js %}
-    <script>
-
-        function deleteConfirmation() {
-            return confirm('Voulez-vous supprimer ce participant ?')
+    <script>0
+        function deleteConfirmation(event, url) {
+            event.preventDefault()
+            let confirmation = confirm('Voulez-vous supprimer ce participant ?')
+            if (confirmation) 
+                window.location.href = url
         }
         $(document).ready( function () {
             $('#participantsTable').DataTable();
+
+            $('#id_fichier').on('change', function() {
+                console.log('file changed');
+                $("#manual-form").hide();
+            });
         } );
     </script>
 {% endblock %}
