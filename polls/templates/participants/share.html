@@ -6,54 +6,66 @@
     <div class="row d-flex justify-content-center mt-3">
         <div class="grid-margin stretch-card mt-5">
             <div class="card">
-                <div class="card-header bg-dark">
-                    <h4 class="text-center mt-3 text-white">Liste des participants et leurs liens</h4>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table id="participantsTable" class="table table-bordered text-nowrap border-bottom mb-0  border">
-                            <thead>
-                                <tr>
-                                    <th class="col">Nom & Prénoms</th>
-                                    <th class="col">Lien</th>
-                                    <th class="col">Status</th>
+                {% if poll.questions.all|length == 0 %}
+                    <div class="card-body">
+                        <div class="alert alert-info text-center">
+                            Aucune question n'a été ajoutée à ce sondage. Veuillez ajouter des questions pour pouvoir partager le sondage.
+                        </div>
 
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for information in informations %}
-                                    <tr>
-                                        <td>
-                                            <span class="badge bg_danger">
-                                                {{ information.full_name }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg_info">
-                                                {{ information.link }}
-                                            </span>
-                                        </td>
-                                        {% if information.submitted %}
-                                            <td>
-                                                <span class="badge bg_seccuss">
-                                                    <!-- <i class='bx bxs-send bx-sm'></i> -->
-                                                    Submitted
-                                                  </span>
-                                            </td>
-                                        {% else %}
-                                            <td class="text-center">
-                                                <span class="badge bg-warning">
-                                                    <!-- <i class='bx bxs-send bx-sm'></i> -->
-                                                    <!-- Partager -->Pending
-                                                  </span>
-                                            </td>
-                                        {% endif %}
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                        <div class="text-center">
+                            <a href="{%  url 'polls.questions.manage' poll.id %}" class="btn btn-dark text-white"> Ajouter des questions</a>
+                        </div>
                     </div>
-                </div>
+                {% else %}
+                    <div class="card-header bg-dark">
+                        <h4 class="text-center mt-3 text-white">Liste des participants et leurs liens</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="participantsTable" class="table table-bordered text-nowrap border-bottom mb-0  border">
+                                <thead>
+                                    <tr>
+                                        <th class="col">Nom & Prénoms</th>
+                                        <th class="col">Lien</th>
+                                        <th class="col">Status</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for information in informations %}
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg_danger">
+                                                    {{ information.full_name }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg_info">
+                                                    {{ information.link }}
+                                                </span>
+                                            </td>
+                                            {% if information.submitted %}
+                                                <td class="text-center">
+                                                    <span class="badge bg_seccuss">
+                                                        <!-- <i class='bx bxs-send bx-sm'></i> -->
+                                                        Submitted
+                                                    </span>
+                                                </td>
+                                            {% else %}
+                                                <td class="text-center">
+                                                    <span class="badge bg-warning">
+                                                        <!-- <i class='bx bxs-send bx-sm'></i> -->
+                                                        <!-- Partager -->Pending
+                                                    </span>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

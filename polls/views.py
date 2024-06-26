@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from .models import Poll, Participant, Type, Possibility, Question, QuestionPossibility, Answer
+from .models import Poll, Participant, Type, Possibility, Question, QuestionPossibility, Answer, PollParticipant
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 import uuid
@@ -147,25 +147,34 @@ def participant_delete(request, id):
 @login_required
 def share_poll(request, id):
     participants = Participant.objects.filter(user=request.user)
+    poll = get_object_or_404(Poll, id=id)
+    if len(poll.questions.all()) == 0:
+        return render(request, 'participants/share.html', {'poll': poll, 'informations': []})
     informations = []
     for participant in participants:
+        poll_participant, created = PollParticipant.objects.get_or_create(poll=Poll.objects.get(id=id), participant=participant)
+        print(poll_participant, created)
         informations.append({
             'full_name': f"{participant.last_name} {participant.first_name}",
             'email': participant.email,
             'link': request.build_absolute_uri(reverse('polls.respond', args=[Poll.objects.get(id=id).token, participant.token])),
-            'submitted': participant.has_submitted
+            'submitted': poll_participant.has_submitted
         })
-    # print(informations)
-    return render(request, 'participants/share.html', {'poll': Poll.objects.get(id=id), 'informations': informations})
+    print(informations)
+    return render(request, 'participants/share.html', {'poll': poll, 'informations': informations})
 
 
 def respond_poll(request, token, key):
     participant = get_object_or_404(Participant, token=key)
     poll = get_object_or_404(Poll, token=token)
     
+    if len(poll.questions.all()) == 0:
+        return HttpResponse(f"<h2 style='text-align:center;'>⚠ Oups😅Le sondage \"{poll.title}\" ne contient aucune question pour le moment ⚠</h2>")
+    poll_participant = get_object_or_404(PollParticipant, poll=poll, participant=participant)
+    
     # recupérer les questions et les réponses deja enregistrées avant soumission
     questions = poll.questions.all()
-    answers = Answer.objects.filter(participant=participant)
+    answers = Answer.objects.filter(poll_participant=poll_participant)
     
     answered_questions = {}
     for answer in answers:
@@ -190,13 +199,13 @@ def respond_poll(request, token, key):
     
     
     if request.method == 'POST':
-        print(participant)
-        participant.has_submitted = True
-        participant.save()
+        print(poll_participant)
+        poll_participant.has_submitted = True
+        poll_participant.save()
         # print('in respond_poll method', request.POST.keys(), 'submitted' in request.POST.keys())
         return HttpResponse('<h2 style="text-align:center;">🙏🏽Merci pour votre participation🙏🏽</h2>')
-    if participant.has_submitted:
-        return HttpResponse('<h2 style="text-align:center;">⚠ Oups😅Vous avez déjà soumis vos réponses ⚠</h2>')
+    if poll_participant.has_submitted:
+        return HttpResponse(f'<h2 style="text-align:center;">⚠ Oups😅Vous avez déjà soumis vos réponses au sondage "{poll.title}" ⚠</h2>')
     return render(request, 'responses/questionnaire.html', {'poll': get_object_or_404(Poll, token=token), 'participant':  get_object_or_404(Participant, token=key), 'answered_questions': answered_questions, 'first_unanswered_index': first_unanswered_index})
 
 @csrf_exempt
@@ -205,6 +214,7 @@ def save_one(request, token, key):
         print('in save_one method', request.POST.keys())
         poll = get_object_or_404(Poll, token=token)
         participant = get_object_or_404(Participant, token=key)
+        poll_participant = get_object_or_404(PollParticipant, poll=poll, participant=participant)
         for key in request.POST:
             if key.startswith('question'):
                 question_id = extract_number(key)
@@ -214,15 +224,16 @@ def save_one(request, token, key):
                 print(values) 
                 
                 if "libre" not in key:
-                    Answer.objects.filter(participant=participant, question_possibility__question=question).delete()
+                    Answer.objects.filter(poll_participant=poll_participant, question_possibility__question=question).delete()
                     for value in values:
                         question_possibility = get_object_or_404(QuestionPossibility, question=question, possibility=int(value))
                         print(question_possibility)
-                        Answer.objects.create(question_possibility=question_possibility, participant=participant)
+                        print(poll_participant)
+                        Answer.objects.create(question_possibility=question_possibility, poll_participant=poll_participant)
                 else:
                     question_possibility = get_object_or_404(QuestionPossibility, question=question)
-                    answer, created = Answer.objects.get_or_create(participant=participant, question_possibility=question_possibility, defaults={'content': values[0]})
-                   
+                    answer, created = Answer.objects.get_or_create(poll_participant=poll_participant, question_possibility=question_possibility, defaults={'content': values[0]})
+                    print(answer, created)
                     if not created:
                        answer.content = values[0]
                        answer.save()
@@ -258,7 +269,6 @@ def stats(request):
     })
     
 def stats_data(request, id):
-    polls = Poll.objects.filter(user=request.user)
     selected_poll = get_object_or_404(Poll, id=id)
     questions = selected_poll.questions.all()
     question_stats = []

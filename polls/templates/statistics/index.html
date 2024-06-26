@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container mt-5">
+    <div class="container-fluid mt-5">
         <div class="d-flex justify-content-center">
             <select id="poll-select">
                 <!-- <option value="">Select a poll</option> -->
@@ -42,12 +42,16 @@
                     success: function(data) {
                         $('#statistics-container').empty();
 
-                        let big_card = $('<div class="card mt-4"></div>');
+                        let big_card = $('<div class="card mt-1"></div>');
                         let big_card_header = $('<div class="card-header bg-dark text-white"></div>');
                         let big_card_body = $('<div class="card-body"></div>');
         
                         big_card_header.append('<h3>' + data.poll.title + ' - Statistiques</h3>');
                         big_card_header.append('<p>' + data.poll.description + '</p>');
+
+                        let body_container = $('<div class="container-fluid"></div>');
+                        let row = $('<div class="row"></div>');
+                        body_container.append(row);
 
                         big_card.append(big_card_header);
                         
@@ -58,7 +62,7 @@
                             big_card.append(big_card_body);
                         } else {
                             data.question_stats.forEach(function(qstat, index) {
-                            let card = $('<div class="card mt-4"></div>');
+                            let card = $('<div class="card mt-4 col-md-6"></div>');
                             let cardHeader = $('<div class="card-header"><h5>'+ (index + 1) + '-' + qstat.question + '</h5></div>');
                             let cardBody = $('<div class="card-body"></div>');
                             if (qstat.type === 'Libre') {
@@ -68,36 +72,72 @@
                                 });
                                 cardBody.append(ul);
                             } else {
-                                let canvas = $('<canvas id="chart-' + index + '" width="400" height="200"></canvas>');
+                                let canvas = $('<canvas id="chart-' + index + '" width="100" height="100"></canvas>');
                                 cardBody.append(canvas);
                                 let ctx = canvas[0].getContext('2d');
-                                new Chart(ctx, {
-                                    type: 'bar',
-                                    data: {
-                                        labels: Object.keys(qstat.responses),
-                                        datasets: [{
-                                            label: 'Responses',
-                                            data: Object.values(qstat.responses),
-                                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                                            borderColor: 'rgba(54, 162, 235, 1)',
-                                            borderWidth: 1
-                                        }]
-                                    },
-                                    options: {
-                                        scales: {
-                                            y: {
-                                                beginAtZero: true,
-                                                ticks: {
-                                                    stepSize: 1
+                                
+                                if (qstat.type === 'Multiple') {
+                                    new Chart(ctx, {
+                                        type: 'pie',
+                                        data: {
+                                            labels: Object.keys(qstat.responses),
+                                            datasets: [{
+                                                label: 'Responses',
+                                                data: Object.values(qstat.responses),
+                                                backgroundColor: [
+                                                    'rgba(255, 99, 132, 0.2)',
+                                                    'rgba(54, 162, 235, 0.2)',
+                                                    'rgba(255, 206, 86, 0.2)',
+                                                    'rgba(75, 192, 192, 0.2)',
+                                                    'rgba(153, 102, 255, 0.2)',
+                                                    'rgba(255, 159, 64, 0.2)'
+                                                ],
+                                                borderColor: [
+                                                    'rgba(255, 99, 132, 1)',
+                                                    'rgba(54, 162, 235, 1)',
+                                                    'rgba(255, 206, 86, 1)',
+                                                    'rgba(75, 192, 192, 1)',
+                                                    'rgba(153, 102, 255, 1)',
+                                                    'rgba(255, 159, 64, 1)'
+                                                ],
+                                                borderWidth: 1
+                                            }]
+                                        },
+                                        options: {
+                                            responsive: true,
+                                        }
+                                    });
+                                } else {
+                                    new Chart(ctx, {
+                                        type: 'bar',
+                                        data: {
+                                            labels: Object.keys(qstat.responses),
+                                            datasets: [{
+                                                label: 'Responses',
+                                                data: Object.values(qstat.responses),
+                                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                                borderColor: 'rgba(54, 162, 235, 1)',
+                                                borderWidth: 1
+                                            }]
+                                        },
+                                        options: {
+                                            scales: {
+                                                y: {
+                                                    beginAtZero: true,
+                                                    ticks: {
+                                                        stepSize: 1
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             }
                             card.append(cardHeader);
                             card.append(cardBody);
                             big_card_body.append(card);
+                            row.append(card);
+                            big_card_body.append(body_container)
                             big_card.append(big_card_body);
                         });
                         }

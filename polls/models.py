@@ -10,6 +10,7 @@ class Poll(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     questions = models.ManyToManyField('Question')
     token = models.UUIDField(editable=False, unique=True, default=uuid.uuid4)
+    participants = models.ManyToManyField('Participant', through='PollParticipant', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -78,14 +79,13 @@ class QuestionPossibility(models.Model):
 
 # Participant model
 class Participant(models.Model):
-    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(max_length=250)
     phone = models.CharField(max_length=15)
     token = models.UUIDField(editable=False, unique=True, blank=True, null=True)
-    has_submitted = models.BooleanField(default=False)
+    polls = models.ManyToManyField(Poll, through='PollParticipant', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -93,13 +93,11 @@ class Participant(models.Model):
         db_table = 'participants'
     
     def __str__(self) -> str:
-        if self.poll:
-            return f"Participant (poll = {self.poll.title}, token = {self.token}), email = {self.email})"
         return f"Participant (email = {self.email})"
     
 class Answer(models.Model):
     question_possibility = models.ForeignKey(QuestionPossibility, on_delete=models.CASCADE, null=True, blank=True)
-    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    poll_participant = models.ForeignKey('PollParticipant', on_delete=models.CASCADE)
     content = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -109,6 +107,21 @@ class Answer(models.Model):
         
     def __str__(self) -> str:
         if not self.question_possibility.possibility:
-            return f"Answer (participant = {self.participant.last_name}, question = {self.question_possibility.question} content = {self.content})"
+            return f"Answer (poll = {self.poll_participant.poll.title}, question = {self.question_possibility.question}, participant = {self.poll_participant.participant.last_name}, question = {self.question_possibility.question} content = {self.content})"
         else :
-            return f"Answer (participant = {self.participant.last_name}, question = {self.question_possibility.question} possibility = {self.question_possibility})"
+            return f"Answer (poll = {self.poll_participant.poll.title}, participant = {self.poll_participant.participant.last_name}, question = {self.question_possibility.question} possibility = {self.question_possibility})"
+        
+
+class PollParticipant(models.Model):
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    has_submitted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'polls_participants'
+        verbose_name_plural = "Polls-Participants"
+    
+    def __str__(self) -> str:
+        return f"PollParticipant (poll = {self.poll.title}, participant = {self.participant.last_name} {self.participant.first_name})"
