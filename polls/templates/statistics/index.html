@@ -72,7 +72,7 @@
                                 });
                                 cardBody.append(ul);
                             } else {
-                                let canvas = $('<canvas id="chart-' + index + '" width="100" height="100"></canvas>');
+                                let canvas = $('<canvas id="chart-' + index + '" width="580" height="350"></canvas>');
                                 cardBody.append(canvas);
                                 let ctx = canvas[0].getContext('2d');
                                 
@@ -82,7 +82,7 @@
                                         data: {
                                             labels: Object.keys(qstat.responses),
                                             datasets: [{
-                                                label: 'Responses',
+                                                label: 'Reponses',
                                                 data: Object.values(qstat.responses),
                                                 backgroundColor: [
                                                     'rgba(255, 99, 132, 0.2)',
@@ -104,7 +104,7 @@
                                             }]
                                         },
                                         options: {
-                                            responsive: true,
+                                            responsive: false,
                                         }
                                     });
                                 } else {
@@ -113,7 +113,7 @@
                                         data: {
                                             labels: Object.keys(qstat.responses),
                                             datasets: [{
-                                                label: 'Responses',
+                                                label: 'Reponses',
                                                 data: Object.values(qstat.responses),
                                                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
                                                 borderColor: 'rgba(54, 162, 235, 1)',
@@ -121,9 +121,10 @@
                                             }]
                                         },
                                         options: {
+                                            responsive: false,
                                             scales: {
                                                 y: {
-                                                    beginAtZero: true,
+                                                    beginAtZero: false,
                                                     ticks: {
                                                         stepSize: 1
                                                     }

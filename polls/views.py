@@ -16,7 +16,7 @@ def home(request):
     user_polls = Poll.objects.filter(user=request.user).order_by('-created_at')[:5]
     
     participants_polls = Participant.objects.filter(user=request.user)
-    return render(request, 'home/index.html', {'user_polls' : user_polls, 'participants_polls': participants_polls})
+    return render(request, 'home/index.html', {'user_polls' : user_polls, 'participants_polls': participants_polls, 'all_polls': Poll.objects.filter(user=request.user)})
 
 
 # @login_required
@@ -167,10 +167,9 @@ def share_poll(request, id):
 def respond_poll(request, token, key):
     participant = get_object_or_404(Participant, token=key)
     poll = get_object_or_404(Poll, token=token)
-    
+    poll_participant = get_object_or_404(PollParticipant, poll=poll, participant=participant)
     if len(poll.questions.all()) == 0:
         return HttpResponse(f"<h2 style='text-align:center;'>⚠ Oups😅Le sondage \"{poll.title}\" ne contient aucune question pour le moment ⚠</h2>")
-    poll_participant = get_object_or_404(PollParticipant, poll=poll, participant=participant)
     
     # recupérer les questions et les réponses deja enregistrées avant soumission
     questions = poll.questions.all()
@@ -277,14 +276,13 @@ def stats_data(request, id):
         stats = {'question': question.label, 'type': question.type.label, 'responses': {}}
         
         if question.type.label == 'Libre':
-            answers = Answer.objects.filter(question_possibility__question=question)
+            answers = Answer.objects.filter(question_possibility__question=question, poll_participant__has_submitted=True)
             stats['responses'] = [answer.content for answer in answers]
         else:
             possibilities = QuestionPossibility.objects.filter(question=question)
             for possibility in possibilities:
                 label = possibility.possibility.label if possibility.possibility else 'None'
-                stats['responses'][label] = Answer.objects.filter(question_possibility=possibility).count()
-        
+                stats['responses'][label] = Answer.objects.filter(question_possibility=possibility, poll_participant__has_submitted=True).count()
         question_stats.append(stats) 
         
     print(len(question_stats))

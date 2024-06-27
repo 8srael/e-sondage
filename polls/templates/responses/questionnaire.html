@@ -43,7 +43,7 @@
                             <div class="question" id="question-{{ forloop.counter }}">
                                 <h3> {{ forloop.counter  }} - {{ question.label }}</h3>
                                 {% if question.type.label == 'Libre' %}
-                                    <textarea class="form-control" name="question-{{ question.type.label | lower }}-{{ question.id }}" required> {% if answered_questions|get_item:question.id != None %}{{ answered_questions|get_item:question.id }} {% endif %}</textarea>
+                                    <textarea class="form-control" name="question-{{ question.type.label | lower }}-{{ question.id }}" required>{% if answered_questions|get_item:question.id != None %}{{ answered_questions|get_item:question.id }} {% endif %}</textarea>
                                 {% else %}
                                     {% for possibility in question.possibilities.all %}
                                         <div class="form-check" >

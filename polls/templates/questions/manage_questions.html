@@ -209,7 +209,10 @@
             const totalPages = Math.ceil(totalQuestions / questionsPerPage);
 
             function updateQuestionDisplay() {
-                document.getElementById('info').innerText = `Page ${currentPage} sur ${totalPages}`;
+                if (totalPages == 0)
+                    document.getElementById('info').innerText = `Page 0 sur ${totalPages}`;
+                else
+                    document.getElementById('info').innerText = `Page ${currentPage} sur ${totalPages}`;
                 document.querySelectorAll('.question').forEach((element, index) => {
                     element.style.display = 'none';
                     if (index >= (currentPage - 1) * questionsPerPage && index < currentPage * questionsPerPage) {
@@ -217,8 +220,13 @@
                     }
                 });
 
-                document.getElementById('prevPageButton').disabled = currentPage === 1;
-                document.getElementById('nextPageButton').disabled = currentPage === totalPages;
+                if (totalPages == 0) {
+                    document.getElementById('nextPageButton').disabled = true;
+                    document.getElementById('prevPageButton').disabled = true;
+                }else {
+                    document.getElementById('prevPageButton').disabled = currentPage === 1;
+                    document.getElementById('nextPageButton').disabled = currentPage === totalPages;
+                }
             }
 
             window.showNextPage = function() {
